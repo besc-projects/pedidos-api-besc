@@ -30,7 +30,7 @@ async def get_all(
     return await get_all_orders(db, skip, limit)
 
 
-@router.get("get_order/{id}", response_model=OrderWithProducts)
+@router.get("/get_order/{id}", response_model=OrderWithProducts)
 async def get_order(id: int, db: AsyncSession = Depends(get_db)):
     return await get_order_with_products(db, id)
 
