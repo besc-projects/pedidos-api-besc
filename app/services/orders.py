@@ -6,40 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.orders import Order as OrderModel
 from app.models.products import Product as ProductModel
 from app.schemas.orders import OrderCreate, OrderWithProducts
-from app.models.payments import Payment as PaymentModel
 from sqlalchemy.orm import selectinload
 
 
 async def create_order(db: AsyncSession, data: OrderCreate) -> JSONResponse:
     try:
-
-        # 🟡 Validate payment_id (if provided)
-        if data.payment_id:
-            # 1️⃣ Check if payment exists
-            result = await db.execute(
-                select(PaymentModel).where(PaymentModel.id == data.payment_id)
-            )
-            payment = result.scalar_one_or_none()
-            if not payment:
-                return JSONResponse(
-                    status_code=404,
-                    content={
-                        "message": f"Payment with id {data.payment_id} not found."
-                    },
-                )
-
-            # 2️⃣ Check if payment_id already used in another order
-            result = await db.execute(
-                select(OrderModel).where(OrderModel.payment_id == data.payment_id)
-            )
-            payment_in_use = result.scalar_one_or_none()
-            if payment_in_use:
-                return JSONResponse(
-                    status_code=400,
-                    content={
-                        "message": f"Payment {data.payment_id} is already linked to another order."
-                    },
-                )
 
         # 🟢 Create main order
         order = OrderModel(**data.model_dump(exclude={"products"}))

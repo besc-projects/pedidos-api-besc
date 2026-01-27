@@ -25,6 +25,8 @@ class Product(Base):
     unit_price = Column(Numeric(12, 2), default=0)
     material = Column(String(255))
     origin = Column(String(255))
+    payment_date = Column(TIMESTAMP, nullable=True)
+    billing_until = Column(TIMESTAMP, nullable=True)
 
     # Relationships
     order = relationship(

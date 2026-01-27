@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
+from datetime import datetime
 
 
 class ProductBase(BaseModel):
@@ -14,7 +15,8 @@ class ProductBase(BaseModel):
     quantity: Optional[int] = None
     material: Optional[str] = None
     origin: Optional[str] = None
-
+    payment_date: Optional[datetime] = None
+    billing_until: Optional[datetime] = None
     model_config = ConfigDict(from_attributes=True)
 
 

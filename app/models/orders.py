@@ -6,16 +6,6 @@ from app.db.base import Base
 class Order(Base):
     __tablename__ = "orders"
 
-    customer_id = Column(
-        Integer,
-        ForeignKey("customers.id", onupdate="CASCADE", ondelete="CASCADE"),
-        nullable=False,
-    )
-    payment_id = Column(
-        Integer,
-        ForeignKey("payments.id", onupdate="CASCADE", ondelete="CASCADE"),
-        nullable=False,
-    )
     status_id = Column(
         Integer,
         ForeignKey("orders_status.id", onupdate="CASCADE", ondelete="RESTRICT"),
@@ -33,6 +23,8 @@ class Order(Base):
     contract_number = Column(String(100))
     invoice_number = Column(String(50))
     total_value = Column(Numeric(12, 2), nullable=False)
+    cnpj = Column(String(30), nullable=False)
+    days_to_delivery = Column(String(50))
 
     proposal_id = Column(
         Integer,
@@ -40,13 +32,8 @@ class Order(Base):
         nullable=True,
     )
 
-    payment = relationship("Payment", foreign_keys=[payment_id])
-
     # Relacionamento com Proposal
     proposals = relationship("Proposal", back_populates="order")
-
-    # Relationships
-    customer = relationship("Customer", back_populates="orders")
 
     status = relationship("OrdersStatus", back_populates="orders")
 

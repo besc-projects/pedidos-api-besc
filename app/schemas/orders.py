@@ -5,14 +5,14 @@ from app.schemas.products import ProductResponse, ProductBase
 
 
 class OrderBase(BaseModel):
-    customer_id: int
     vale_order_id: int
     status_id: int
     total_value: float
-    payment_id: int
     portal: str
     center: str
     state: str
+    cnpj: str
+    days_to_delivery: Optional[str] = None
     proposal_id: Optional[int] = None
     besc_order_id: Optional[int] = None
     contract_number: Optional[str] = None
