@@ -159,6 +159,6 @@ Abra um PR
 
 
 Licença
-MIT © 2025
+MIT © 2025.
 
 
