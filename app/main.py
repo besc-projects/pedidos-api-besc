@@ -7,6 +7,7 @@ from app.routers.orders import router as router_orders
 from app.routers.products import router as router_products
 from app.routers.auth import router as router_auth
 from app.routers.taxes import router as router_tax
+from app.routers.price_table import router as router_price_table
 from app.database import init_db
 
 # Cria instância principal da aplicação
@@ -23,6 +24,7 @@ app.include_router(router_orders, tags=["Orders"])
 app.include_router(router_products, tags=["Products"])
 app.include_router(router_auth, tags=["Authentication"])
 app.include_router(router_tax, tags=["Tax"])
+app.include_router(router_price_table, tags=["Price Table"])
 
 
 # ====================================

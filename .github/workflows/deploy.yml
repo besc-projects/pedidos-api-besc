@@ -1,4 +1,4 @@
-name: Deploy API Manager Orders to Cloud Run
+name: Deploy API Manager Products Prices to Cloud Run
 
 on:
   push:
@@ -20,14 +20,14 @@ jobs:
       run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
     - name: Build Docker image
-      run: docker build -t besc-api-manager-orders .
+      run: docker build -t besc-api-manager-products-prices .
 
     - name: Tag Docker image
       run: |
-        docker tag besc-api-manager-orders \
-        us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/docker-images/besc-api-manager-orders:latest
+        docker tag besc-api-manager-products-prices \
+        us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/docker-images/besc-api-manager-products-prices:latest
 
     - name: Push Docker image
       run: |
         docker push \
-        us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/docker-images/besc-api-manager-orders:latest
+        us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/docker-images/besc-api-manager-products-prices:latest
