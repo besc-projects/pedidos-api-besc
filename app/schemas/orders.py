@@ -12,6 +12,7 @@ class OrderBase(BaseModel):
     center: str
     state: str
     cnpj: str
+    date: datetime
     days_to_delivery: Optional[str] = None
     proposal_id: Optional[int] = None
     besc_order_id: Optional[int] = None

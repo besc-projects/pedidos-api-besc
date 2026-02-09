@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, BigInteger
+from sqlalchemy import (
+    Column,
+    Date,
+    DateTime,
+    Integer,
+    String,
+    Numeric,
+    ForeignKey,
+    BigInteger,
+)
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
@@ -25,6 +34,7 @@ class Order(Base):
     total_value = Column(Numeric(12, 2), nullable=False)
     cnpj = Column(String(30), nullable=False)
     days_to_delivery = Column(String(50))
+    date = Column(DateTime, nullable=False)
 
     proposal_id = Column(
         Integer,
