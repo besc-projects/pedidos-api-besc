@@ -15,7 +15,7 @@ class Proposal(Base):
     email = Column(String(255), nullable=True)
     request_date = Column(DateTime, nullable=True)
 
-    # Relationships
+    # Relationship
     proposals_status = relationship(
         "ProposalsStatus", back_populates="proposals_status"
     )

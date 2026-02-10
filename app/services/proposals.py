@@ -11,7 +11,7 @@ async def create_proposal(db: AsyncSession, proposal_in: ProposalCreate) -> Prop
     """
     Create a new proposal in the database.
     """
-    # Check for duplicate proposal_number
+    # Check for duplicate proposal_numbe
     if proposal_in.proposal_number:
         result = await db.execute(
             select(ProposalModel).filter(

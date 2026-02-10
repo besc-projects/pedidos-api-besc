@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.core.security import jwt_middleware
 from app.routers.orders import router as router_orders
 from app.routers.products import router as router_products
+from app.routers.proposals import router as router_proposals
 from app.routers.auth import router as router_auth
 from app.routers.taxes import router as router_tax
 from app.routers.price_table import router as router_price_table
@@ -23,6 +24,7 @@ app.middleware("http")(jwt_middleware)
 # Inclui rotas registradas
 app.include_router(router_orders, tags=["Orders"])
 app.include_router(router_products, tags=["Products"])
+app.include_router(router_proposals, tags=["Proposals"])
 app.include_router(router_auth, tags=["Authentication"])
 app.include_router(router_tax, tags=["Tax"])
 app.include_router(router_price_table, tags=["Price Table"])

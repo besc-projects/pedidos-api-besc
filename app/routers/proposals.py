@@ -28,7 +28,7 @@ async def create_proposal_route(
 @router.get("/{id}", response_model=Proposal)
 async def get_proposal_route(id: int, db: AsyncSession = Depends(get_db)):
     """
-    Retrieve a proposal by its ID.
+    Retrieve a proposal by its ID..
     """
     return await get_proposal(db, id)
 
