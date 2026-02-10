@@ -29,6 +29,7 @@ from app.models.taxs import Tax
 from app.models.tickets import Ticket
 from app.models.user import User
 from app.models.price_table import PriceTable
+from app.models.history_process import HistoryProcess
 
 target_metadata = Base.metadata
 

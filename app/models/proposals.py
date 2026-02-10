@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, ForeignKey, String
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
@@ -11,6 +11,9 @@ class Proposal(Base):
         Integer,
         ForeignKey("proposals_status.id", onupdate="CASCADE", ondelete="SET NULL"),
     )
+
+    email = Column(String(255), nullable=True)
+    request_date = Column(DateTime, nullable=True)
 
     # Relationships
     proposals_status = relationship(
