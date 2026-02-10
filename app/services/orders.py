@@ -5,7 +5,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.orders import Order as OrderModel
 from app.models.products import Product as ProductModel
-from app.schemas.orders import OrderCreate, OrderWithProducts
+from app.schemas.orders import OrderCreate, OrderWithProducts, OrderUpdate
 from sqlalchemy.orm import selectinload
 
 
@@ -91,6 +91,53 @@ async def update_order_status(db: AsyncSession, vale_order_id: int, status_id: i
             "order": jsonable_encoder(order),
         },
     )
+
+
+async def update_order(db: AsyncSession, vale_order_id: int, data: OrderUpdate):
+    """Updates an order with only the fields provided in the request."""
+    try:
+        result = await db.execute(
+            select(OrderModel).where(OrderModel.vale_order_id == vale_order_id)
+        )
+        order = result.scalars().first()
+
+        if not order:
+            return JSONResponse(status_code=404, content={"message": "Order not found"})
+
+        # Get only the fields that were actually provided (not None)
+        update_data = data.model_dump(exclude_unset=True)
+
+        if not update_data:
+            return JSONResponse(
+                status_code=400, content={"message": "No fields to update"}
+            )
+
+        # Update only the provided fields
+        for field, value in update_data.items():
+            if hasattr(order, field):
+                setattr(order, field, value)
+
+        await db.commit()
+        await db.refresh(order)
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "Order updated successfully!",
+                "updated_fields": list(update_data.keys()),
+                "order": jsonable_encoder(order),
+            },
+        )
+
+    except Exception as e:
+        await db.rollback()
+        return JSONResponse(
+            status_code=500,
+            content={
+                "message": "Internal error while updating order",
+                "error": str(e),
+            },
+        )
 
 
 # 🔴 Delete order

@@ -6,6 +6,7 @@ from app.services.orders import (
     get_order_with_products,
     get_all_orders,
     update_order_status,
+    update_order,
     delete_order,
 )
 from app.schemas.orders import (
@@ -13,6 +14,7 @@ from app.schemas.orders import (
     OrderWithProducts,
     OrderResponse,
     OrderUpdater,
+    OrderUpdate,
 )
 
 router = APIRouter(prefix="/api/orders")
@@ -35,9 +37,18 @@ async def get_order(id: int, db: AsyncSession = Depends(get_db)):
     return await get_order_with_products(db, id)
 
 
-@router.put("/{id}", response_model=OrderWithProducts)
-async def update(id: int, data: OrderUpdater, db: AsyncSession = Depends(get_db)):
+@router.put("/status/{id}", response_model=OrderWithProducts)
+async def update_status(
+    id: int, data: OrderUpdater, db: AsyncSession = Depends(get_db)
+):
+    """Update only the status of an order."""
     return await update_order_status(db, id, data.status_id)
+
+
+@router.patch("/{id}", response_model=OrderWithProducts)
+async def update(id: int, data: OrderUpdate, db: AsyncSession = Depends(get_db)):
+    """Update any fields of an order. Only provided fields will be updated."""
+    return await update_order(db, id, data)
 
 
 @router.delete("/{id}", response_model=dict)

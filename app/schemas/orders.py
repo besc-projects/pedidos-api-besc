@@ -29,6 +29,25 @@ class OrderUpdater(BaseModel):
     status_id: int = Field(..., description="ID do novo status do pedido")
 
 
+class OrderUpdate(BaseModel):
+    """Schema for partial order updates - all fields optional."""
+
+    status_id: Optional[int] = None
+    total_value: Optional[float] = None
+    portal: Optional[str] = None
+    center: Optional[str] = None
+    state: Optional[str] = None
+    cnpj: Optional[str] = None
+    date: Optional[datetime] = None
+    days_to_delivery: Optional[str] = None
+    proposal_id: Optional[int] = None
+    besc_order_id: Optional[int] = None
+    contract_number: Optional[str] = None
+    invoice_number: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class OrderCreate(OrderBase):
     """Schema for creating an order with optional product list."""
 
