@@ -4,7 +4,7 @@ from app.database import get_db
 from app.services.history_process import (
     create_history_process,
     get_all_history,
-    get_history_by_orders,
+    get_history_by_order_id,
     get_history_by_step,
 )
 from app.schemas.history_process import (
@@ -21,14 +21,24 @@ async def create(data: HistoryProcessCreate, db: AsyncSession = Depends(get_db))
     """
     Cria um novo registro de histórico de processo.
 
-    **Regras:**
-    - `id_situation` deve ser maior que 0
-    - Não pode existir o mesmo `id_situation` para o mesmo `step` na mesma `orders`
+    **Campos:**
+    - `order_id`: ID do pedido (obrigatório, BigInteger)
+    - `step`: Etapa do processo (obrigatório, até 80 caracteres)
+    - `description`: Descrição detalhada do evento (obrigatório)
+    - `severity`: Severidade do evento - info|warning|error (opcional, padrão: info)
+    - `created_by`: Email/login/nome do criador (opcional, até 120 caracteres)
+    - `occurred_at`: Quando o evento ocorreu (opcional, padrão: agora)
 
     **Exemplo:**
-    - ✅ Permitido: orders='123', step='proposta', id_situation=1
-    - ❌ Bloqueado: orders='123', step='proposta', id_situation=1 (duplicado)
-    - ✅ Permitido: orders='123', step='proposta', id_situation=2
+    ```json
+    {
+      "order_id": 123,
+      "step": "cadastro",
+      "description": "Pedido criado com sucesso",
+      "severity": "info",
+      "created_by": "usuario@email.com"
+    }
+    ```
     """
     return await create_history_process(db, data)
 
@@ -43,21 +53,24 @@ async def get_all(
 ):
     """
     Retorna todos os registros de histórico com paginação.
+    Ordenado por occurred_at (mais recente primeiro).
     """
     return await get_all_history(db, skip, limit)
 
 
-@router.get("/orders/{orders}")
-async def get_by_orders(orders: str, db: AsyncSession = Depends(get_db)):
+@router.get("/order/{order_id}")
+async def get_by_order(order_id: int, db: AsyncSession = Depends(get_db)):
     """
     Retorna todos os registros de histórico para um pedido específico.
+    Ordenado por occurred_at (mais recente primeiro).
     """
-    return await get_history_by_orders(db, orders)
+    return await get_history_by_order_id(db, order_id)
 
 
-@router.get("/orders/{orders}/step/{step}")
-async def get_by_step(orders: str, step: str, db: AsyncSession = Depends(get_db)):
+@router.get("/order/{order_id}/step/{step}")
+async def get_by_step(order_id: int, step: str, db: AsyncSession = Depends(get_db)):
     """
     Retorna todos os registros de histórico para um pedido e step específicos.
+    Ordenado por occurred_at (mais recente primeiro).
     """
-    return await get_history_by_step(db, orders, step)
+    return await get_history_by_step(db, order_id, step)

@@ -1,21 +1,26 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 from datetime import datetime
+from enum import Enum
+
+
+class SeverityEnum(str, Enum):
+    info = "info"
+    warning = "warning"
+    error = "error"
 
 
 class HistoryProcessBase(BaseModel):
-    orders: str = Field(..., max_length=64, description="Número do pedido")
-    step: str = Field(..., max_length=20, description="Etapa do processo")
-    id_situation: int = Field(
-        ..., gt=0, description="ID da situação (deve ser maior que 0)"
+    order_id: int = Field(..., gt=0, description="ID do pedido")
+    step: str = Field(..., max_length=80, description="Etapa do processo")
+    description: str = Field(..., description="Descrição detalhada do evento")
+    severity: SeverityEnum = Field(
+        default=SeverityEnum.info, description="Severidade do evento"
     )
-
-    @field_validator("id_situation")
-    @classmethod
-    def validate_id_situation(cls, v):
-        if v <= 0:
-            raise ValueError("id_situation deve ser maior que 0")
-        return v
+    created_by: Optional[str] = Field(
+        None, max_length=120, description="Email/login/nome do robot que criou o evento"
+    )
+    occurred_at: Optional[datetime] = Field(None, description="Quando o evento ocorreu")
 
 
 class HistoryProcessCreate(HistoryProcessBase):
@@ -25,6 +30,7 @@ class HistoryProcessCreate(HistoryProcessBase):
 class HistoryProcessResponse(HistoryProcessBase):
     id: int
     created_at: datetime
+    occurred_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 

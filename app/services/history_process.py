@@ -13,30 +13,11 @@ async def create_history_process(
 ) -> JSONResponse:
     """
     Cria um novo registro de histórico de processo.
-    Não permite duplicação de id_situation para o mesmo step na mesma orders.
+    Permite múltiplos registros para o mesmo pedido e step.
     """
     try:
-        # Verifica se já existe a combinação orders + step + id_situation
-        result = await db.execute(
-            select(HistoryProcess).where(
-                HistoryProcess.orders == data.orders,
-                HistoryProcess.step == data.step,
-                HistoryProcess.id_situation == data.id_situation,
-            )
-        )
-        existing = result.scalars().first()
-
-        if existing:
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "message": "Registro já existe",
-                    "detail": f"Já existe um registro para orders '{data.orders}', step '{data.step}' com id_situation {data.id_situation}",
-                },
-            )
-
         # Cria o novo registro
-        history = HistoryProcess(**data.model_dump())
+        history = HistoryProcess(**data.model_dump(exclude_none=True))
         db.add(history)
         await db.commit()
         await db.refresh(history)
@@ -56,7 +37,7 @@ async def create_history_process(
             status_code=400,
             content={
                 "message": "Erro de integridade ao criar histórico",
-                "detail": "Já existe um registro com essa combinação de orders, step e id_situation",
+                "detail": str(e),
             },
         )
     except Exception as e:
@@ -84,7 +65,7 @@ async def get_all_history(
         # Busca os registros com paginação
         result = await db.execute(
             select(HistoryProcess)
-            .order_by(HistoryProcess.created_at.desc())
+            .order_by(HistoryProcess.occurred_at.desc())
             .offset(skip)
             .limit(limit)
         )
@@ -108,15 +89,15 @@ async def get_all_history(
         )
 
 
-async def get_history_by_orders(db: AsyncSession, orders: str) -> JSONResponse:
+async def get_history_by_order_id(db: AsyncSession, order_id: int) -> JSONResponse:
     """
     Retorna todos os registros de histórico para um pedido específico.
     """
     try:
         result = await db.execute(
             select(HistoryProcess)
-            .where(HistoryProcess.orders == orders)
-            .order_by(HistoryProcess.created_at.desc())
+            .where(HistoryProcess.order_id == order_id)
+            .order_by(HistoryProcess.occurred_at.desc())
         )
         histories = result.scalars().all()
 
@@ -124,14 +105,14 @@ async def get_history_by_orders(db: AsyncSession, orders: str) -> JSONResponse:
             return JSONResponse(
                 status_code=404,
                 content={
-                    "message": f"Nenhum histórico encontrado para o pedido '{orders}'"
+                    "message": f"Nenhum histórico encontrado para o pedido {order_id}"
                 },
             )
 
         return JSONResponse(
             status_code=200,
             content={
-                "orders": orders,
+                "order_id": order_id,
                 "total": len(histories),
                 "items": jsonable_encoder(histories),
             },
@@ -147,7 +128,9 @@ async def get_history_by_orders(db: AsyncSession, orders: str) -> JSONResponse:
         )
 
 
-async def get_history_by_step(db: AsyncSession, orders: str, step: str) -> JSONResponse:
+async def get_history_by_step(
+    db: AsyncSession, order_id: int, step: str
+) -> JSONResponse:
     """
     Retorna todos os registros de histórico para um pedido e step específicos.
     """
@@ -155,10 +138,10 @@ async def get_history_by_step(db: AsyncSession, orders: str, step: str) -> JSONR
         result = await db.execute(
             select(HistoryProcess)
             .where(
-                HistoryProcess.orders == orders,
+                HistoryProcess.order_id == order_id,
                 HistoryProcess.step == step,
             )
-            .order_by(HistoryProcess.created_at.desc())
+            .order_by(HistoryProcess.occurred_at.desc())
         )
         histories = result.scalars().all()
 
@@ -166,14 +149,14 @@ async def get_history_by_step(db: AsyncSession, orders: str, step: str) -> JSONR
             return JSONResponse(
                 status_code=404,
                 content={
-                    "message": f"Nenhum histórico encontrado para orders '{orders}' e step '{step}'"
+                    "message": f"Nenhum histórico encontrado para order_id {order_id} e step '{step}'"
                 },
             )
 
         return JSONResponse(
             status_code=200,
             content={
-                "orders": orders,
+                "order_id": order_id,
                 "step": step,
                 "total": len(histories),
                 "items": jsonable_encoder(histories),
