@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.orders import Order as OrderModel
+from app.models.proposals import Proposal as ProposalModel
 from app.models.products import Product as ProductModel
 from app.schemas.orders import OrderCreate, OrderWithProducts, OrderUpdate
 from sqlalchemy.orm import selectinload
@@ -200,6 +201,11 @@ async def get_all_orders(db: AsyncSession, skip: int = 0, limit: int = 10):
     result = await db.execute(
         select(OrderModel)
         .options(selectinload(OrderModel.products))
+        .options(
+            selectinload(OrderModel.proposals).selectinload(
+                ProposalModel.proposals_status
+            )
+        )
         .offset(skip)
         .limit(limit)
         .filter(OrderModel.status_id == 0)
@@ -211,10 +217,21 @@ async def get_all_orders(db: AsyncSession, skip: int = 0, limit: int = 10):
     if not orders:
         return JSONResponse(status_code=404, content={"message": "No orders found"})
 
-    orders_schema = [
-        OrderWithProducts.model_validate(order, from_attributes=True).model_dump()
-        for order in orders
-    ]
+    orders_schema = []
+    for order in orders:
+        order_data = OrderWithProducts.model_validate(
+            order, from_attributes=True
+        ).model_dump()
+
+        proposal_status = None
+        if order.proposals and order.proposals.proposals_status:
+            proposal_status = {
+                "id": order.proposals.proposals_status.id,
+                "description": order.proposals.proposals_status.description,
+            }
+
+        order_data["proposal_status"] = proposal_status
+        orders_schema.append(order_data)
 
     return JSONResponse(
         status_code=200,
