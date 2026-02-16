@@ -17,7 +17,7 @@ class ProductBase(BaseModel):
     origin: Optional[str] = None
     payment_date: Optional[datetime] = None
     billing_until: Optional[datetime] = None
-    status_status_id: int = 0
+    stock_status_id: Optional[int] = 0
     model_config = ConfigDict(from_attributes=True)
 
 
