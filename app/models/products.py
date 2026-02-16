@@ -27,6 +27,7 @@ class Product(Base):
     origin = Column(String(255))
     payment_date = Column(TIMESTAMP, nullable=True)
     billing_until = Column(TIMESTAMP, nullable=True)
+    status_status_id = Column(Integer, default=0)
 
     # Relationships
     order = relationship(
