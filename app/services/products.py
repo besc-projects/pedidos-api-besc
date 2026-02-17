@@ -4,7 +4,11 @@ from fastapi import HTTPException
 from app.models.orders import Order as OrderModel
 from app.models.products import Product as ProductModel
 from app.models.taxs import Tax as TaxRecordModel
-from app.schemas.products import ProductCreate, ProductResponse
+from app.schemas.products import (
+    ProductCreate,
+    ProductResponse,
+    ProductStockStatusUpdate,
+)
 
 
 # 🟢 Create product
@@ -61,7 +65,7 @@ async def get_products_by_order(db: AsyncSession, order_id: int):
 
 # 🟠 Update product
 async def update_product(
-    db: AsyncSession, item_id: int, product_in: ProductCreate
+    db: AsyncSession, item_id: int, product_in: ProductStockStatusUpdate
 ) -> ProductResponse:
     # Check if product exists
     result = await db.execute(select(ProductModel).filter(ProductModel.id == item_id))
@@ -69,18 +73,10 @@ async def update_product(
     if not product:
         raise HTTPException(404, "Product not found")
 
-    # Validate new tax record (if provided)
-    if product_in.tax_record_id:
-        result = await db.execute(
-            select(TaxRecordModel).where(TaxRecordModel.id == product_in.tax_record_id)
-        )
-        if not result.scalar_one_or_none():
-            raise HTTPException(400, "Invalid tax record ID — record not found.")
-
     await db.execute(
         update(ProductModel)
         .where(ProductModel.id == item_id)
-        .values(**product_in.model_dump(exclude_unset=True))
+        .values(stock_status_id=product_in.stock_status_id)
     )
     await db.commit()
     return await get_product(db, item_id)

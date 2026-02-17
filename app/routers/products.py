@@ -3,11 +3,16 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.schemas.products import ProductResponse, ProductCreate
+from app.schemas.products import (
+    ProductResponse,
+    ProductCreate,
+    ProductStockStatusUpdate,
+)
 from app.services.products import (
     create_product,
     get_product,
     get_products_by_order,
+    update_product,
 )
 
 router = APIRouter(prefix="/api/products", tags=["Products"])
@@ -53,3 +58,18 @@ async def create_products_bulk(
         product_created = await create_product(db, prod)
         created.append(product_created)
     return created
+
+
+# 🟠 Update product by ID
+@router.put(
+    "/{product_id}", response_model=ProductResponse, status_code=status.HTTP_200_OK
+)
+async def update_product_by_id(
+    product_id: int,
+    product_in: ProductStockStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Update only stock_status_id by product ID.
+    """
+    return await update_product(db, product_id, product_in)
