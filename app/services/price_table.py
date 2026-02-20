@@ -11,6 +11,10 @@ from app.schemas.price_table import (
 from typing import List
 
 
+def _normalize_state(state: str) -> str:
+    return state.strip().upper()
+
+
 # 🟢 Create price table entry
 async def create_price_table_entry(
     db: AsyncSession, price_data: PriceTableCreate
@@ -19,20 +23,30 @@ async def create_price_table_entry(
     Cria uma nova entrada na tabela de preços.
     Valida se o PN já existe antes de criar.
     """
-    # Verifica se já existe um produto com o mesmo PN
+    normalized_state = _normalize_state(price_data.destination)
+
+    # Verifica se já existe um produto com o mesmo PN no mesmo estado
     result = await db.execute(
-        select(PriceTableModel).where(PriceTableModel.pn == price_data.pn)
+        select(PriceTableModel).where(
+            PriceTableModel.pn == price_data.pn,
+            PriceTableModel.destination == normalized_state,
+        )
     )
     existing_product = result.scalar_one_or_none()
 
     if existing_product:
         raise HTTPException(
             status_code=400,
-            detail=f"Product with PN '{price_data.pn}' already exists",
+            detail=(
+                f"Product with PN '{price_data.pn}' already exists "
+                f"for destination '{normalized_state}'"
+            ),
         )
 
     # Cria o novo produto
-    new_entry = PriceTableModel(**price_data.model_dump())
+    payload = price_data.model_dump()
+    payload["destination"] = normalized_state
+    new_entry = PriceTableModel(**payload)
     db.add(new_entry)
 
     try:
@@ -48,20 +62,30 @@ async def create_price_table_entry(
 
 
 # 🔵 Get price by PN
-async def get_price_by_pn(db: AsyncSession, pn: str) -> PriceByPNResponse:
+async def get_price_by_pn(db: AsyncSession, pn: str, state: str) -> PriceByPNResponse:
     """
     Retorna o preço unitário de um produto com base no PN.
     """
-    result = await db.execute(select(PriceTableModel).where(PriceTableModel.pn == pn))
+    normalized_state = _normalize_state(state)
+    result = await db.execute(
+        select(PriceTableModel).where(
+            PriceTableModel.pn == pn,
+            PriceTableModel.destination == normalized_state,
+        )
+    )
     product = result.scalar_one_or_none()
 
     if not product:
-        raise HTTPException(status_code=404, detail=f"Product with PN '{pn}' not found")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Product with PN '{pn}' not found for destination '{normalized_state}'",
+        )
 
     return PriceByPNResponse(
         pn=product.pn,
         unit_price=product.unit_price,
         description=product.description,
+        destination=product.destination,
     )
 
 
@@ -161,9 +185,15 @@ async def delete_price_table_entry(db: AsyncSession, entry_id: int) -> dict:
 
 
 # 🔍 Check if PN exists
-async def check_pn_exists(db: AsyncSession, pn: str) -> bool:
+async def check_pn_exists(db: AsyncSession, pn: str, state: str) -> bool:
     """
     Verifica se um PN já existe na tabela de preços.
     """
-    result = await db.execute(select(PriceTableModel).where(PriceTableModel.pn == pn))
+    normalized_state = _normalize_state(state)
+    result = await db.execute(
+        select(PriceTableModel).where(
+            PriceTableModel.pn == pn,
+            PriceTableModel.destination == normalized_state,
+        )
+    )
     return result.scalar_one_or_none() is not None

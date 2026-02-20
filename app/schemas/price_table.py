@@ -10,9 +10,10 @@ class PriceTableBase(BaseModel):
         ..., description="Descrição longa do produto", min_length=1
     )
     description: str = Field(..., description="Descrição do produto", min_length=1)
-    destination: str = Field(..., description="Destino do produto", min_length=1)
+    destination: str = Field(
+        ..., description="Destino do produto [MG ou PA]", min_length=1
+    )
     unit_price: float = Field(..., description="Preço unitário", gt=0)
-
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -29,7 +30,6 @@ class PriceTableUpdate(BaseModel):
     description: Optional[str] = Field(None, min_length=1)
     destination: Optional[str] = Field(None, min_length=1)
     unit_price: Optional[float] = Field(None, gt=0)
-
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -47,5 +47,5 @@ class PriceByPNResponse(BaseModel):
     pn: str = Field(..., description="Part Number (PN) do produto")
     unit_price: float = Field(..., description="Preço unitário")
     description: str = Field(..., description="Descrição do produto")
-
+    destination: str = Field(..., description="Destino do produto [MG ou PA]")
     model_config = ConfigDict(from_attributes=True)

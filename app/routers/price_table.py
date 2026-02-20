@@ -53,13 +53,18 @@ async def create_price_entry(
     summary="Consultar preço por PN",
     description="Retorna o preço unitário de um produto com base no Part Number (PN).",
 )
-async def get_price_for_pn(pn: str, db: AsyncSession = Depends(get_db)):
+async def get_price_for_pn(
+    pn: str,
+    state: str = Query(..., min_length=2, max_length=2, description="UF do produto"),
+    db: AsyncSession = Depends(get_db),
+):
     """
     Retorna o preço unitário de um produto específico.
 
     - **pn**: Part Number do produto
+    - **state**: UF do estado desejado (ex.: MG, PA)
     """
-    return await get_price_by_pn(db, pn)
+    return await get_price_by_pn(db, pn, state)
 
 
 # 🟣 Get price table entry by ID
@@ -146,11 +151,16 @@ async def delete_entry(entry_id: int, db: AsyncSession = Depends(get_db)):
     summary="Verificar se PN existe",
     description="Verifica se um Part Number já está cadastrado na tabela de preços.",
 )
-async def check_pn(pn: str, db: AsyncSession = Depends(get_db)):
+async def check_pn(
+    pn: str,
+    state: str = Query(..., min_length=2, max_length=2, description="UF do produto"),
+    db: AsyncSession = Depends(get_db),
+):
     """
     Verifica se um PN já existe na tabela de preços.
 
     - **pn**: Part Number a ser verificado
+    - **state**: UF do estado desejado (ex.: MG, PA)
     """
-    exists = await check_pn_exists(db, pn)
-    return {"pn": pn, "exists": exists}
+    exists = await check_pn_exists(db, pn, state)
+    return {"pn": pn, "state": state.upper(), "exists": exists}
