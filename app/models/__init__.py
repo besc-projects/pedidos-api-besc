@@ -5,6 +5,8 @@ from .products import Product
 from .proposals import Proposal
 from .shipments import Shipment
 from .tickets import Ticket
+from .tickets import TicketProgress
+from .tickets import TicketDivergence
 from .taxs import Tax
 from .status.proposals import ProposalsStatus
 from .status.shipment import ShipmentStatus

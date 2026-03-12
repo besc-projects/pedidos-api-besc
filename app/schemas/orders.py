@@ -6,6 +6,7 @@ from app.schemas.products import ProductResponse, ProductBase
 
 class OrderBase(BaseModel):
     vale_order_id: int
+    ticket_id: Optional[int] = None
     status_id: int
     total_value: float
     portal: str
@@ -33,6 +34,7 @@ class OrderUpdate(BaseModel):
     """Schema for partial order updates - all fields optional."""
 
     status_id: Optional[int] = None
+    ticket_id: Optional[int] = None
     total_value: Optional[float] = None
     portal: Optional[str] = None
     center: Optional[str] = None

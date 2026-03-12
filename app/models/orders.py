@@ -21,6 +21,7 @@ class Order(Base):
         default=0,
     )
     state = Column(String(3))
+    ticket_id = Column(Integer, nullable=True, index=True)
     vale_order_id = Column(BigInteger, unique=True, nullable=False)
     total_value = Column(Numeric(12, 2), nullable=False)
 

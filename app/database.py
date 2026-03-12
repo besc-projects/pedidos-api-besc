@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 from app.db.base import Base  # DeclarativeBase centralizado
 from sqlalchemy.orm import configure_mappers
 
+
 # ================================
 # CONFIGURAÇÃO: URL & Engine
 # ================================
