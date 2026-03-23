@@ -19,7 +19,7 @@ class OrderBase(BaseModel):
     besc_order_id: Optional[int] = None
     contract_number: Optional[str] = None
     invoice_number: Optional[str] = None
-
+    version: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -46,7 +46,7 @@ class OrderUpdate(BaseModel):
     besc_order_id: Optional[int] = None
     contract_number: Optional[str] = None
     invoice_number: Optional[str] = None
-
+    version: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
 
 

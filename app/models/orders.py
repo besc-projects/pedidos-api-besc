@@ -36,6 +36,7 @@ class Order(Base):
     cnpj = Column(String(30), nullable=False)
     days_to_delivery = Column(String(50))
     date = Column(DateTime, nullable=False)
+    version = Column(Integer, default=1)
 
     proposal_id = Column(
         Integer,
