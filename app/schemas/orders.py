@@ -20,6 +20,8 @@ class OrderBase(BaseModel):
     contract_number: Optional[str] = None
     invoice_number: Optional[str] = None
     version: Optional[int] = None
+    ipi: Optional[float] = None
+    icms: Optional[float] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -47,6 +49,8 @@ class OrderUpdate(BaseModel):
     contract_number: Optional[str] = None
     invoice_number: Optional[str] = None
     version: Optional[int] = None
+    ipi: Optional[float] = None
+    icms: Optional[float] = None
     model_config = ConfigDict(from_attributes=True)
 
 
