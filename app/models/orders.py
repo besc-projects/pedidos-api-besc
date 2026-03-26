@@ -1,6 +1,5 @@
 from sqlalchemy import (
     Column,
-    Date,
     DateTime,
     Integer,
     String,
@@ -37,8 +36,6 @@ class Order(Base):
     days_to_delivery = Column(String(50))
     date = Column(DateTime, nullable=False)
     version = Column(Integer, default=1)
-    icms = Column(Numeric(12, 2), nullable=True)
-    ipi = Column(Numeric(12, 2), nullable=True)
     proposal_id = Column(
         Integer,
         ForeignKey("proposals.id", onupdate="CASCADE", ondelete="SET NULL"),

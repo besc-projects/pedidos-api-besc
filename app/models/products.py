@@ -12,9 +12,6 @@ class Product(Base):
         ForeignKey("orders.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
-    tax_id = Column(
-        Integer, ForeignKey("tax.id", onupdate="CASCADE", ondelete="SET NULL")
-    )
 
     item = Column(String(10))
     part_number = Column(String(50))
@@ -28,11 +25,11 @@ class Product(Base):
     payment_date = Column(TIMESTAMP, nullable=True)
     billing_until = Column(TIMESTAMP, nullable=True)
     stock_status_id = Column(Integer, default=0)
-
+    icms = Column(Numeric(5, 2), default=0)
+    ipi = Column(Numeric(5, 2), default=0)
     # Relationships
     order = relationship(
         "Order",
         back_populates="products",
         foreign_keys=[order_id],
     )
-    tax = relationship("Tax", back_populates="products")

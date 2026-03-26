@@ -7,7 +7,6 @@ from app.routers.orders import router as router_orders
 from app.routers.products import router as router_products
 from app.routers.proposals import router as router_proposals
 from app.routers.auth import router as router_auth
-from app.routers.taxes import router as router_tax
 from app.routers.price_table import router as router_price_table
 from app.routers.history_process import router as router_history_process
 from app.routers.tickets import router as router_tickets
@@ -30,7 +29,6 @@ app.include_router(router_orders, tags=["Orders"])
 app.include_router(router_products, tags=["Products"])
 app.include_router(router_proposals, tags=["Proposals"])
 app.include_router(router_auth, tags=["Authentication"])
-app.include_router(router_tax, tags=["Tax"])
 app.include_router(router_price_table, tags=["Price Table"])
 app.include_router(router_history_process, tags=["History Process"])
 app.include_router(router_tickets, tags=["Tickets"])

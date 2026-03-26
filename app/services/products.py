@@ -3,7 +3,6 @@ from sqlalchemy import select, update, delete
 from fastapi import HTTPException
 from app.models.orders import Order as OrderModel
 from app.models.products import Product as ProductModel
-from app.models.taxs import Tax as TaxRecordModel
 from app.schemas.products import (
     ProductCreate,
     ProductResponse,
@@ -23,18 +22,36 @@ async def create_product(
     if not order:
         raise HTTPException(404, "Order not found")
 
-    # Validate tax record (if provided)
-    if product_in.tax_id:
-        result = await db.execute(
-            select(TaxRecordModel).where(TaxRecordModel.id == product_in.tax_id)
+    # Try to find an existing product in the same order.
+    existing_product = None
+    if product_in.part_number:
+        existing_result = await db.execute(
+            select(ProductModel).where(
+                ProductModel.order_id == order.id,
+                ProductModel.part_number == product_in.part_number,
+            )
         )
-        if not result.scalar_one_or_none():
-            raise HTTPException(400, "Invalid tax record ID — record not found.")
+        existing_product = existing_result.scalars().first()
 
-    # Create product
-    db_product = ProductModel(**product_in.model_dump())
-    db_product.order_id = order.id
-    db.add(db_product)
+    if product_in.item:
+        existing_result = await db.execute(
+            select(ProductModel).where(
+                ProductModel.order_id == order.id,
+                ProductModel.item == product_in.item,
+            )
+        )
+        existing_product = existing_result.scalars().first()
+
+    if existing_product:
+        update_data = product_in.model_dump(exclude_unset=True, exclude={"order_id"})
+        for field, value in update_data.items():
+            setattr(existing_product, field, value)
+        existing_product.order_id = order.id
+        db_product = existing_product
+    else:
+        db_product = ProductModel(**product_in.model_dump())
+        db_product.order_id = order.id
+        db.add(db_product)
 
     try:
         await db.commit()
@@ -80,6 +97,7 @@ async def update_product(
     )
     await db.commit()
     return await get_product(db, item_id)
+
 
 
 # 🔴 Delete product

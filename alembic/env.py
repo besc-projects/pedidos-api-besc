@@ -25,7 +25,6 @@ from app.models.orders import Order
 from app.models.products import Product
 from app.models.proposals import Proposal
 from app.models.shipments import Shipment
-from app.models.taxs import Tax
 from app.models.tickets import Ticket
 from app.models.user import User
 from app.models.price_table import PriceTable

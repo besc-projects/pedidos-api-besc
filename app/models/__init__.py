@@ -7,9 +7,7 @@ from .shipments import Shipment
 from .tickets import Ticket
 from .tickets import TicketProgress
 from .tickets import TicketDivergence
-from .taxs import Tax
 from .status.proposals import ProposalsStatus
 from .status.shipment import ShipmentStatus
 from .status.tickets import TicketStatus
-from .taxes.icms import ICMS
-from .taxes.ipi import IPI
+
