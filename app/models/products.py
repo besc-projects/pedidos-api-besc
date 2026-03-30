@@ -27,6 +27,7 @@ class Product(Base):
     stock_status_id = Column(Integer, default=0)
     icms = Column(Numeric(5, 2), default=0)
     ipi = Column(Numeric(5, 2), default=0)
+    tickets_status_id = Column(Integer, default=None)
     # Relationships
     order = relationship(
         "Order",
