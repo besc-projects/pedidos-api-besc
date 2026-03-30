@@ -5,6 +5,7 @@ from app.services.orders import (
     create_order,
     get_order_with_products,
     get_all_orders,
+    get_orders_by_status,
     update_order_status,
     update_order,
     delete_order,
@@ -30,6 +31,16 @@ async def get_all(
     db: AsyncSession = Depends(get_db), skip: int = Query(0), limit: int = Query(100)
 ):
     return await get_all_orders(db, skip, limit)
+
+
+@router.get("/status/{status_id}", response_model=list[OrderWithProducts])
+async def get_all_by_status(
+    status_id: int,
+    db: AsyncSession = Depends(get_db),
+    skip: int = Query(0),
+    limit: int = Query(100),
+):
+    return await get_orders_by_status(db, status_id, skip, limit)
 
 
 @router.get("/get_order/{id}", response_model=OrderWithProducts)

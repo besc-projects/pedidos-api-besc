@@ -243,3 +243,56 @@ async def get_all_orders(db: AsyncSession, skip: int = 0, limit: int = 10):
             }
         ),
     )
+
+
+async def get_orders_by_status(
+    db: AsyncSession, status_id: int, skip: int = 0, limit: int = 10
+):
+    result = await db.execute(
+        select(OrderModel)
+        .options(selectinload(OrderModel.products))
+        .options(
+            selectinload(OrderModel.proposals).selectinload(
+                ProposalModel.proposals_status
+            )
+        )
+        .offset(skip)
+        .limit(limit)
+        .filter(OrderModel.status_id == status_id)
+    )
+
+    orders = result.scalars().unique().all()
+
+    if not orders:
+        return JSONResponse(
+            status_code=404,
+            content={"message": f"No orders found for status_id={status_id}"},
+        )
+
+    orders_schema = []
+    for order in orders:
+        order_data = OrderWithProducts.model_validate(
+            order, from_attributes=True
+        ).model_dump()
+
+        proposal_status = None
+        if order.proposals and order.proposals.proposals_status:
+            proposal_status = {
+                "id": order.proposals.proposals_status.id,
+                "description": order.proposals.proposals_status.description,
+            }
+
+        order_data["proposal_status"] = proposal_status
+        orders_schema.append(order_data)
+
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(
+            {
+                "message": "Orders retrieved successfully!",
+                "status_id": status_id,
+                "total": len(orders_schema),
+                "orders": orders_schema,
+            }
+        ),
+    )
