@@ -31,10 +31,6 @@ class ProductUpdate(ProductBase):
     pass
 
 
-class ProductStockStatusUpdate(BaseModel):
-    stock_status_id: int
-
-
 class ProductResponse(ProductBase):
     id: int
 

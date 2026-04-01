@@ -6,7 +6,7 @@ from app.database import get_db
 from app.schemas.products import (
     ProductResponse,
     ProductCreate,
-    ProductStockStatusUpdate,
+    ProductUpdate,
 )
 from app.services.products import (
     create_product,
@@ -66,10 +66,10 @@ async def create_products_bulk(
 )
 async def update_product_by_id(
     product_id: int,
-    product_in: ProductStockStatusUpdate,
+    product_in: ProductUpdate,
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Update only stock_status_id by product ID.
+    Partially update product fields by product ID.
     """
     return await update_product(db, product_id, product_in)

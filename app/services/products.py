@@ -1,12 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, delete
 from fastapi import HTTPException
 from app.models.orders import Order as OrderModel
 from app.models.products import Product as ProductModel
 from app.schemas.products import (
     ProductCreate,
     ProductResponse,
-    ProductStockStatusUpdate,
+    ProductUpdate,
 )
 
 
@@ -82,7 +82,7 @@ async def get_products_by_order(db: AsyncSession, order_id: int):
 
 # 🟠 Update product
 async def update_product(
-    db: AsyncSession, item_id: int, product_in: ProductStockStatusUpdate
+    db: AsyncSession, item_id: int, product_in: ProductUpdate
 ) -> ProductResponse:
     # Check if product exists
     result = await db.execute(select(ProductModel).filter(ProductModel.id == item_id))
@@ -90,13 +90,31 @@ async def update_product(
     if not product:
         raise HTTPException(404, "Product not found")
 
-    await db.execute(
-        update(ProductModel)
-        .where(ProductModel.id == item_id)
-        .values(stock_status_id=product_in.stock_status_id)
-    )
-    await db.commit()
-    return await get_product(db, item_id)
+    update_data = product_in.model_dump(exclude_unset=True)
+    if not update_data:
+        raise HTTPException(400, "No fields provided for update")
+
+    if "order_id" in update_data:
+        result = await db.execute(
+            select(OrderModel).where(OrderModel.vale_order_id == update_data["order_id"])
+        )
+        order = result.scalars().first()
+        if not order:
+            raise HTTPException(404, "Order not found")
+        product.order_id = order.id
+        update_data.pop("order_id")
+
+    for field, value in update_data.items():
+        setattr(product, field, value)
+
+    try:
+        await db.commit()
+        await db.refresh(product)
+    except Exception:
+        await db.rollback()
+        raise HTTPException(400, "Error while updating product.")
+
+    return ProductResponse.model_validate(product, from_attributes=True)
 
 
 
