@@ -80,6 +80,13 @@ async def get_products_by_order(db: AsyncSession, order_id: int):
     return [ProductResponse.model_validate(p) for p in result.scalars().all()]
 
 
+# 🟣 Get products by id
+async def get_products_by_product(db: AsyncSession, product_id: int):
+    result = await db.execute(
+        select(ProductModel).filter(ProductModel.id == product_id)
+    )
+    return [ProductResponse.model_validate(p) for p in result.scalars().all()]
+
 # 🟠 Update product
 async def update_product(
     db: AsyncSession, item_id: int, product_in: ProductUpdate
