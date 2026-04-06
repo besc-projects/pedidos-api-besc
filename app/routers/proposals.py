@@ -6,6 +6,7 @@ from app.services.proposals import (
     create_proposal,
     get_proposal,
     delete_proposal,
+    proposal_exists,
     update_proposal,
 )
 from app.schemas.proposals import Proposal, ProposalCreate, ProposalUpdate
@@ -31,6 +32,12 @@ async def get_proposal_route(id: int, db: AsyncSession = Depends(get_db)):
     Retrieve a proposal by its ID..
     """
     return await get_proposal(db, id)
+
+@router.get("/exists/{proposal_number}", response_model=bool)
+async def check_proposal_exists_route(proposal_number: str, db: AsyncSession = Depends(get_db)):
+    """Check if a proposal with the given proposal_number exists.
+    """   
+    return await proposal_exists(db, proposal_number)
 
 
 # 🟣 Update proposal
