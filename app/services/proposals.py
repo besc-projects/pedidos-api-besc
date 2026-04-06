@@ -51,17 +51,27 @@ async def get_proposal(db: AsyncSession, proposal_id: int) -> Proposal:
     return Proposal.model_validate(proposal, from_attributes=True)
 
 
-async def proposal_exists(db: AsyncSession, proposal_number: str) -> bool:
+async def proposal_exists(db: AsyncSession, proposal_number: str) -> Proposal:
     """
     Check if a proposal with the given proposal_number exists.
     """
     result = await db.execute(
         select(ProposalModel).filter(
-            ProposalModel.proposal_number == proposal_number
+            ProposalModel.proposal_number == int(proposal_number)
         )
     )
+
+    proposal = result.scalar_one_or_none()
+
+    if not proposal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Proposal Number not found.",
+        )
+
+    return Proposal.model_validate(proposal, from_attributes=True)
     
-    return result.scalar_one_or_none() is not None
+
 
 
 # 🟣 Update a proposal

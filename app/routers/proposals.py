@@ -33,7 +33,7 @@ async def get_proposal_route(id: int, db: AsyncSession = Depends(get_db)):
     """
     return await get_proposal(db, id)
 
-@router.get("/exists/{proposal_number}", response_model=bool)
+@router.get("/exists/{proposal_number}", response_model=Proposal)
 async def check_proposal_exists_route(proposal_number: str, db: AsyncSession = Depends(get_db)):
     """Check if a proposal with the given proposal_number exists.
     """   
