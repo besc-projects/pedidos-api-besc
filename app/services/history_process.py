@@ -13,9 +13,28 @@ async def create_history_process(
 ) -> JSONResponse:
     """
     Cria um novo registro de histórico de processo.
-    Permite múltiplos registros para o mesmo pedido e step.
+    Verifica se já existe um registro com a mesma order_id e description antes de criar.
     """
     try:
+        # Verifica se já existe um registro com essa order_id e description
+        existing = await db.execute(
+            select(HistoryProcess).where(
+                HistoryProcess.order_id == data.order_id,
+                HistoryProcess.description == data.description,
+            )
+        )
+        existing_history = existing.scalars().first()
+
+        if existing_history:
+            return JSONResponse(
+                status_code=409,
+                content={
+                    "message": "Este histórico já existe para este pedido",
+                    "detail": f"Já existe um registro com order_id {data.order_id} e description '{data.description}'",
+                    "data": jsonable_encoder(existing_history),
+                },
+            )
+
         # Cria o novo registro
         history = HistoryProcess(**data.model_dump(exclude_none=True))
         db.add(history)
@@ -171,3 +190,4 @@ async def get_history_by_step(
                 "error": str(e),
             },
         )
+

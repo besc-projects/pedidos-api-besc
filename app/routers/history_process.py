@@ -6,6 +6,7 @@ from app.services.history_process import (
     get_all_history,
     get_history_by_order_id,
     get_history_by_step,
+    check_description_exists_by_order_id,
 )
 from app.schemas.history_process import (
     HistoryProcessCreate,
@@ -74,3 +75,15 @@ async def get_by_step(order_id: int, step: str, db: AsyncSession = Depends(get_d
     Ordenado por occurred_at (mais recente primeiro).
     """
     return await get_history_by_step(db, order_id, step)
+
+
+@router.get("/order/{order_id}/has-description")
+async def check_description(order_id: int, db: AsyncSession = Depends(get_db)):
+    """
+    Verifica se existe um registro de histórico com description para um pedido específico.
+    Retorna:
+    - exists: true/false
+    - total: quantidade de registros com description
+    - items: lista dos registros encontrados
+    """
+    return await check_description_exists_by_order_id(db, order_id)
