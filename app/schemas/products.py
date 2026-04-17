@@ -18,6 +18,7 @@ class ProductBase(BaseModel):
     billing_until: Optional[datetime] = None
     ipi: Optional[float] = None
     icms: Optional[float] = None
+    icms_st: Optional[float] = None
     tickets_status_id: Optional[int] = None
     stock_status_id: Optional[int] = 0
     model_config = ConfigDict(from_attributes=True)

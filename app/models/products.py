@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, TIMESTAMP, Text
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from app.db.base import Base
 
 
@@ -26,6 +25,7 @@ class Product(Base):
     billing_until = Column(TIMESTAMP, nullable=True)
     stock_status_id = Column(Integer, default=0)
     icms = Column(Numeric(5, 2), default=0)
+    icms_st = Column(Numeric(5, 2), default=0)
     ipi = Column(Numeric(5, 2), default=0)
     tickets_status_id = Column(Integer, default=None)
     # Relationships
