@@ -186,7 +186,7 @@ async def get_all_tickets(
         stmt = stmt.where(TicketModel.ticket_number == ticket_number)
          
     if purchase_order:
-        stmt = stmt.where(TicketModel.purchase_order == purchase_order)
+        stmt = stmt.where(TicketModel.purchase_order == int(purchase_order))
 
     result = await db.execute(stmt)
     tickets = result.scalars().all()

@@ -10,7 +10,6 @@ from app.schemas.ticket.divergence import (
     TicketDivergenceUpdate,
 )
 
-
 async def create_ticket_divergence(
     db: AsyncSession,
     ticket_id: int,
