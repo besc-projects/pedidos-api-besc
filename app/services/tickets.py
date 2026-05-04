@@ -113,44 +113,22 @@ async def create_ticket(db: AsyncSession, ticket_in: TicketCreate) -> TicketResp
     await _ensure_ticket_number_unique(db, payload.get("ticket_number"))
     await _ensure_ticket_status_exists(db, payload.get("status_id"))
 
-    # Verificar se o pedido já tem um ticket associado
-
     db_ticket = TicketModel(**payload)
-
-    # verificar se o pedido já tem um ticket associado
-
-    # filtrar se a coluna vale_order_id existe como valor purchase_order
-    
 
     order = await db.execute(select(OrderModel).where(OrderModel.vale_order_id == db_ticket.purchase_order))
     order = order.scalar_one_or_none()
-        
+
     if order is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Order with purchase order '{payload['purchase_order']}' not found",
         )
 
-
-    # verificar se o pedido já tem um ticket associado
-    if payload.get("purchase_order") is not None and order.ticket_id is not None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Order with purchase order '{payload['purchase_order']}' already has an associated ticket",
-        )
-
-    db_ticket.order_id = order.id if order else None
-    # Caso, o pedido exista e não tenha nenhum ticket associado, o ticket é criado e o ID do ticket é associado ao pedido
+    # Associa o ticket ao pedido; múltiplos tickets por purchase_order são permitidos.
+    # O ticket_id do pedido sempre refletirá o ticket mais recente.
+    db_ticket.order_id = order.id
     db.add(db_ticket)
 
-    if payload.get("order_id") is not None:
-        order = await db.get(OrderModel, payload["order_id"])
-        if not order:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Order with ID {payload['order_id']} not found",
-            )
- 
     try:
         await db.flush()
 

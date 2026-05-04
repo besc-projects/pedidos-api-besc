@@ -12,6 +12,7 @@ from app.routers.history_process import router as router_history_process
 from app.routers.tickets import router as router_tickets
 from app.routers.ticket.progress import router as router_ticket_progress
 from app.routers.ticket.divergence import router as router_ticket_divergence
+from app.routers.tax_reference import router as router_tax_reference
 
 from app.database import init_db
 
@@ -34,6 +35,7 @@ app.include_router(router_history_process, tags=["History Process"])
 app.include_router(router_tickets, tags=["Tickets"])
 app.include_router(router_ticket_progress, tags=["Ticket Progress"])
 app.include_router(router_ticket_divergence, tags=["Ticket Divergence"])
+app.include_router(router_tax_reference, tags=["Tax Reference"])
 
 
 
