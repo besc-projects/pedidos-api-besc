@@ -72,7 +72,9 @@ async def get_order_with_products(db: AsyncSession, order_number: int):
     )
 
 
-async def update_order_status(db: AsyncSession, vale_order_id: int, status_id: int):
+async def update_order_status(
+    db: AsyncSession, vale_order_id: int, process_id: int, status_code: int
+):
     result = await db.execute(
         select(OrderModel).where(OrderModel.vale_order_id == vale_order_id)
     )
@@ -81,7 +83,8 @@ async def update_order_status(db: AsyncSession, vale_order_id: int, status_id: i
     if not order:
         raise HTTPException(404, "Order not found")
 
-    order.status_id = status_id
+    order.process_id = process_id
+    order.status_code = status_code
     await db.commit()
     await db.refresh(order)
 
@@ -198,6 +201,8 @@ async def get_order(db: AsyncSession, order_id: int):
 
 
 async def get_all_orders(db: AsyncSession, skip: int = 0, limit: int = 10):
+    PROCESS_ID_ORDERS = 1
+    STATUS_CODE_PENDING = 0
     result = await db.execute(
         select(OrderModel)
         .options(selectinload(OrderModel.products))
@@ -208,7 +213,7 @@ async def get_all_orders(db: AsyncSession, skip: int = 0, limit: int = 10):
         )
         .offset(skip)
         .limit(limit)
-        .filter(OrderModel.status_id == 0)
+        .filter(OrderModel.process_id == PROCESS_ID_ORDERS, OrderModel.status_code == STATUS_CODE_PENDING)
     )
 
     # Get unique order
@@ -246,7 +251,7 @@ async def get_all_orders(db: AsyncSession, skip: int = 0, limit: int = 10):
 
 
 async def get_orders_by_status(
-    db: AsyncSession, status_id: int, skip: int = 0, limit: int = 10
+    db: AsyncSession, process_id: int, status_code: int, skip: int = 0, limit: int = 10
 ):
     result = await db.execute(
         select(OrderModel)
@@ -258,7 +263,10 @@ async def get_orders_by_status(
         )
         .offset(skip)
         .limit(limit)
-        .filter(OrderModel.status_id == status_id)
+        .filter(
+            OrderModel.process_id == process_id,
+            OrderModel.status_code == status_code,
+        )
     )
 
     orders = result.scalars().unique().all()
@@ -266,7 +274,9 @@ async def get_orders_by_status(
     if not orders:
         return JSONResponse(
             status_code=404,
-            content={"message": f"No orders found for status_id={status_id}"},
+            content={
+                "message": f"No orders found for process_id={process_id} and status_code={status_code}"
+            },
         )
 
     orders_schema = []
@@ -290,7 +300,8 @@ async def get_orders_by_status(
         content=jsonable_encoder(
             {
                 "message": "Orders retrieved successfully!",
-                "status_id": status_id,
+                "process_id": process_id,
+                "status_code": status_code,
                 "total": len(orders_schema),
                 "orders": orders_schema,
             }

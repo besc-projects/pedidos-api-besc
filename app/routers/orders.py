@@ -15,6 +15,7 @@ from app.schemas.orders import (
     OrderWithProducts,
     OrderResponse,
     OrderUpdater,
+    OrderStatusFilter,
     OrderUpdate,
 )
 
@@ -33,14 +34,16 @@ async def get_all(
     return await get_all_orders(db, skip, limit)
 
 
-@router.get("/status/{status_id}", response_model=list[OrderWithProducts])
+@router.post("/status", response_model=list[OrderWithProducts])
 async def get_all_by_status(
-    status_id: int,
+    filter: OrderStatusFilter,
     db: AsyncSession = Depends(get_db),
     skip: int = Query(0),
     limit: int = Query(100),
 ):
-    return await get_orders_by_status(db, status_id, skip, limit)
+    return await get_orders_by_status(
+        db, filter.process_id, filter.status_code, skip, limit
+    )
 
 
 @router.get("/get_order/{id}", response_model=OrderWithProducts)
@@ -52,8 +55,8 @@ async def get_order(id: int, db: AsyncSession = Depends(get_db)):
 async def update_status(
     id: int, data: OrderUpdater, db: AsyncSession = Depends(get_db)
 ):
-    """Update only the status of an order."""
-    return await update_order_status(db, id, data.status_id)
+    """Update the process and status code of an order."""
+    return await update_order_status(db, id, data.process_id, data.status_code)
 
 
 @router.patch("/{id}", response_model=OrderWithProducts)

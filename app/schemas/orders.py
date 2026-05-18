@@ -7,7 +7,8 @@ from app.schemas.products import ProductResponse, ProductBase
 class OrderBase(BaseModel):
     vale_order_id: int
     ticket_id: Optional[int] = None
-    status_id: int
+    process_id: int = 0
+    status_code: int = 0
     total_value: float
     portal: str
     center: str
@@ -26,13 +27,22 @@ class OrderBase(BaseModel):
 
 
 class OrderUpdater(BaseModel):
-    status_id: int = Field(..., description="ID do novo status do pedido")
+    process_id: int = Field(..., description="ID do processo do pedido")
+    status_code: int = Field(..., description="Código do status do pedido")
+
+
+class OrderStatusFilter(BaseModel):
+    process_id: int
+    status_code: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OrderUpdate(BaseModel):
     """Schema for partial order updates - all fields optional."""
 
-    status_id: Optional[int] = None
+    process_id: Optional[int] = None
+    status_code: Optional[int] = None
     ticket_id: Optional[int] = None
     total_value: Optional[float] = None
     portal: Optional[str] = None

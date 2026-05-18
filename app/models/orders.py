@@ -14,11 +14,8 @@ from app.db.base import Base
 class Order(Base):
     __tablename__ = "orders"
 
-    status_id = Column(
-        Integer,
-        ForeignKey("orders_status.id", onupdate="CASCADE", ondelete="RESTRICT"),
-        default=0,
-    )
+    process_id = Column(Integer, default=0, nullable=False)
+    status_code = Column(Integer, default=0, nullable=False)
     state = Column(String(3))
     ticket_id = Column(Integer, nullable=True, index=True)
     vale_order_id = Column(BigInteger, unique=True, nullable=False)
@@ -44,8 +41,6 @@ class Order(Base):
 
     # Relacionamento com Proposal
     proposals = relationship("Proposal", back_populates="order")
-
-    status = relationship("OrdersStatus", back_populates="orders")
 
     # 🔹 1:1 com Shipment
     shipment = relationship(
