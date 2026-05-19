@@ -10,11 +10,24 @@ from app.schemas.orders import OrderCreate, OrderWithProducts, OrderUpdate
 from sqlalchemy.orm import selectinload
 
 
+def _order_response_schema(order: OrderModel, products=None):
+    order_data = order.__dict__.copy()
+    if order_data.get("process_id") is None:
+        order_data["process_id"] = 0
+    if order_data.get("status_code") is None:
+        order_data["status_code"] = 0
+    if products is not None:
+        order_data["products"] = products
+    return OrderWithProducts.model_validate(order_data, from_attributes=True).model_dump()
+
+
 async def create_order(db: AsyncSession, data: OrderCreate) -> JSONResponse:
     try:
 
         # 🟢 Create main order
         order = OrderModel(**data.model_dump(exclude={"products"}))
+        order.process_id = 1  # Default process for new orders
+        order.status_code = 0  # Default status for new orders
         db.add(order)
         await db.commit()
         await db.refresh(order)
@@ -57,10 +70,7 @@ async def get_order_with_products(db: AsyncSession, order_number: int):
     products = result_prod.scalars().all()
 
     # Build response schema
-    order_schema = OrderWithProducts.model_validate(
-        {**order.__dict__, "products": products}, from_attributes=True
-    ).model_dump()
-
+    order_schema = _order_response_schema(order, products)
     order_data = jsonable_encoder(order_schema)
 
     return JSONResponse(
@@ -193,9 +203,7 @@ async def get_order(db: AsyncSession, order_id: int):
         status_code=200,
         content={
             "message": "Order found!",
-            "order": OrderWithProducts.model_validate(
-                {**order.__dict__, "products": products}, from_attributes=True
-            ).model_dump(),
+            "order": _order_response_schema(order, products),
         },
     )
 
@@ -224,9 +232,7 @@ async def get_all_orders(db: AsyncSession, skip: int = 0, limit: int = 10):
 
     orders_schema = []
     for order in orders:
-        order_data = OrderWithProducts.model_validate(
-            order, from_attributes=True
-        ).model_dump()
+        order_data = _order_response_schema(order)
 
         proposal_status = None
         if order.proposals and order.proposals.proposals_status:
@@ -257,7 +263,8 @@ async def get_orders_by_status(
         select(OrderModel)
         .options(selectinload(OrderModel.products))
         .options(
-            selectinload(OrderModel.proposals).selectinload(
+            selectinload(OrderModel.proposals)
+            .selectinload(
                 ProposalModel.proposals_status
             )
         )
@@ -281,9 +288,7 @@ async def get_orders_by_status(
 
     orders_schema = []
     for order in orders:
-        order_data = OrderWithProducts.model_validate(
-            order, from_attributes=True
-        ).model_dump()
+        order_data = _order_response_schema(order)
 
         proposal_status = None
         if order.proposals and order.proposals.proposals_status:

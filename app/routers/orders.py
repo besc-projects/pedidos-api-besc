@@ -34,15 +34,20 @@ async def get_all(
     return await get_all_orders(db, skip, limit)
 
 
-@router.post("/status", response_model=list[OrderWithProducts])
+@router.get("/status")
 async def get_all_by_status(
-    filter: OrderStatusFilter,
-    db: AsyncSession = Depends(get_db),
+    process_id: int = Query(...),
+    status_code: int = Query(...),
     skip: int = Query(0),
     limit: int = Query(100),
+    db: AsyncSession = Depends(get_db),
 ):
     return await get_orders_by_status(
-        db, filter.process_id, filter.status_code, skip, limit
+        db=db,
+        process_id=process_id,
+        status_code=status_code,
+        skip=skip,
+        limit=limit,
     )
 
 
