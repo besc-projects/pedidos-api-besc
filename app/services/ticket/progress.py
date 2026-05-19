@@ -16,27 +16,9 @@ async def create_ticket_progress(
     db: AsyncSession, ticket_id: int, progress_in: TicketProgressCreate
 ) -> TicketProgressResponse:
     ticket = await db.get(Ticket, ticket_id)
+
     if not ticket:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
-
-
-    # verificar se ticket_id existe e status_progress_id existe
-    existing = await db.execute(
-        select(TicketProgress).where(
-            and_(
-                TicketProgress.ticket_id == ticket_id,
-                TicketProgress.status_progress_id == progress_in.status_progress_id
-            )
-        )
-    )
-
-    existing_ticket = existing.scalar_one_or_none()
-
-    if existing_ticket:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Progress for ticket '{ticket_id}' already exists",
-        )
 
     progress = TicketProgress(ticket_id=ticket_id, **progress_in.model_dump())
     db.add(progress)
