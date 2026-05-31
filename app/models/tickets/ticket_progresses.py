@@ -6,10 +6,15 @@ from app.db.base import Base
 
 class TicketProgress(Base):
     __tablename__ = "ticket_progresses"
+    __table_args__ = {"schema": "support"}
 
     ticket_id = Column(
         Integer,
-        ForeignKey("tickets.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey(
+            "support.tickets.id",
+            onupdate="CASCADE",
+            ondelete="CASCADE",
+        ),
         nullable=False,
     )
     status_progress_id = Column(Integer, nullable=True)

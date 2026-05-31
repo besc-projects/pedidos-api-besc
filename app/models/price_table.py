@@ -2,12 +2,20 @@ from sqlalchemy import Column, Integer, String, Float, UniqueConstraint
 from app.db.base import Base
 
 
-class PriceTable(Base):
-    """Modelo da tabela de preços"""
+from sqlalchemy import Column, Integer, String, Float, UniqueConstraint
+from app.db.base import Base
 
+
+class PriceTable(Base):
     __tablename__ = "price_table"
+
     __table_args__ = (
-        UniqueConstraint("pn", "destination", name="uq_price_table_pn_destination"),
+        UniqueConstraint(
+            "pn",
+            "destination",
+            name="uq_price_table_pn_destination"
+        ),
+        {"schema": "core"},
     )
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -18,4 +26,7 @@ class PriceTable(Base):
     unit_price = Column(Float, nullable=False)
 
     def __repr__(self):
-        return f"<PriceTable(pn={self.pn}, unit_price={self.unit_price})>"
+        return (
+            f"<PriceTable(pn={self.pn}, "
+            f"unit_price={self.unit_price})>"
+        )

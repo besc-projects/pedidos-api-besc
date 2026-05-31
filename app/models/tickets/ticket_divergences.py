@@ -6,11 +6,15 @@ from app.db.base import Base
 
 class TicketDivergence(Base):
     __tablename__ = "ticket_divergences"
+    __table_args__ = {"schema": "support"}
+
 
     item_id = Column(Integer, nullable=True)
     ticket_id = Column(
         Integer,
-        ForeignKey("tickets.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("support.tickets.id", 
+            onupdate="CASCADE", 
+            ondelete="CASCADE"),
         nullable=False,
     )
     legal_basis = Column(Text, nullable=True)

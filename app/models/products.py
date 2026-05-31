@@ -1,14 +1,13 @@
 from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, TIMESTAMP, Text
 from sqlalchemy.orm import relationship
 from app.db.base import Base
-
-
 class Product(Base):
     __tablename__ = "products"
+    __table_args__ = {"schema": "core"}
 
     order_id = Column(
         Integer,
-        ForeignKey("orders.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("core.orders.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
 
@@ -23,12 +22,14 @@ class Product(Base):
     origin = Column(String(255))
     payment_date = Column(TIMESTAMP, nullable=True)
     billing_until = Column(TIMESTAMP, nullable=True)
+
     stock_status_id = Column(Integer, default=0)
+    tickets_status_id = Column(Integer, default=None)
+
     icms = Column(Numeric(5, 2), default=0)
     icms_st = Column(Numeric(5, 2), default=0)
     ipi = Column(Numeric(5, 2), default=0)
-    tickets_status_id = Column(Integer, default=None)
-    # Relationships
+
     order = relationship(
         "Order",
         back_populates="products",

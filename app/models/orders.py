@@ -13,15 +13,13 @@ from app.db.base import Base
 
 class Order(Base):
     __tablename__ = "orders"
+    __table_args__ = {"schema": "core"}
 
     process_id = Column(Integer, default=0, nullable=False)
     status_code = Column(Integer, default=0, nullable=False)
     state = Column(String(3))
     ticket_id = Column(Integer, nullable=True, index=True)
     vale_order_id = Column(BigInteger, unique=True, nullable=False)
-    total_value = Column(Numeric(12, 2), nullable=False)
-
-    # Relationships
 
     portal = Column(String(50))
     center = Column(String(100))
@@ -33,16 +31,22 @@ class Order(Base):
     days_to_delivery = Column(String(50))
     date = Column(DateTime, nullable=False)
     version = Column(Integer, default=1)
+
     proposal_id = Column(
         Integer,
-        ForeignKey("proposals.id", onupdate="CASCADE", ondelete="SET NULL"),
+        ForeignKey(
+            "commercial.proposals.id",
+            onupdate="CASCADE",
+            ondelete="SET NULL",
+        ),
         nullable=True,
     )
 
-    # Relacionamento com Proposal
-    proposals = relationship("Proposal", back_populates="order")
+    proposals = relationship(
+        "Proposal",
+        back_populates="order",
+    )
 
-    # 🔹 1:1 com Shipment
     shipment = relationship(
         "Shipment",
         back_populates="order",
@@ -52,8 +56,13 @@ class Order(Base):
     )
 
     products = relationship(
-        "Product", back_populates="order", cascade="all, delete-orphan"
+        "Product",
+        back_populates="order",
+        cascade="all, delete-orphan",
     )
+
     tickets = relationship(
-        "Ticket", back_populates="order", cascade="all, delete-orphan"
+        "Ticket",
+        back_populates="order",
+        cascade="all, delete-orphan",
     )

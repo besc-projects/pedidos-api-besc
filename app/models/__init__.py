@@ -1,6 +1,4 @@
 from .orders import Order
-from .status.orders import OrdersStatus
-
 from .products import Product
 from .proposals import Proposal
 from .shipments import Shipment

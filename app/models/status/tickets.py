@@ -4,4 +4,9 @@ from sqlalchemy.orm import relationship
 
 class TicketStatus(BaseStatus):
     __tablename__ = "tickets_status"
-    tickets = relationship("Ticket", back_populates="status")
+    __table_args__ = {"schema": "support"}
+
+    tickets = relationship(
+        "Ticket",
+        back_populates="status"
+    )

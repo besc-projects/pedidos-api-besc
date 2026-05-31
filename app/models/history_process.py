@@ -11,6 +11,7 @@ from app.db.base import Base
 
 class HistoryProcess(Base):
     __tablename__ = "history_process"
+    __table_args__ = {"schema": "audit"}
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     order_id = Column(BigInteger, nullable=False)
