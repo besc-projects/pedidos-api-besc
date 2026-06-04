@@ -48,7 +48,7 @@ async def _ensure_ticket_status_exists(db: AsyncSession, status_id: int | None) 
         return
 
     result = await db.execute(
-        text("SELECT 1 FROM tickets_status WHERE id = :status_id"),
+        text("SELECT 1 FROM support.tickets_status WHERE id = :status_id"),
         {"status_id": status_id},
     )
     if result.scalar_one_or_none() is not None:
@@ -64,6 +64,7 @@ async def _ensure_ticket_status_exists(db: AsyncSession, status_id: int | None) 
                 SELECT column_name
                 FROM information_schema.columns
                 WHERE table_name = 'tickets_status'
+                  AND table_schema = 'support'
                 """
             )
         )
@@ -86,7 +87,7 @@ async def _ensure_ticket_status_exists(db: AsyncSession, status_id: int | None) 
         await db.execute(
             text(
                 f"""
-                INSERT INTO tickets_status ({columns_sql})
+                INSERT INTO support.tickets_status ({columns_sql})
                 VALUES ({values_sql})
                 ON CONFLICT (id) DO NOTHING
                 """

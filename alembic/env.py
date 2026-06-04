@@ -30,6 +30,7 @@ from app.models.user import User
 from app.models.price_table import PriceTable
 from app.models.history_process import HistoryProcess
 from app.models.tax_reference import TaxReferenceProductSupra
+from app.models.status.tickets import TicketStatus
 
 target_metadata = Base.metadata
 

@@ -23,24 +23,25 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
 
-    if not inspector.has_table("tickets_status"):
+    if not inspector.has_table("tickets_status", schema="support"):
         return
 
-    columns = {column["name"] for column in inspector.get_columns("tickets_status")}
+    columns = {column["name"] for column in inspector.get_columns("tickets_status", schema="support")}
 
     if "name" not in columns:
-        op.add_column("tickets_status", sa.Column("name", sa.String(length=255), nullable=True))
+        op.add_column("tickets_status", sa.Column("name", sa.String(length=255), nullable=True), schema="support")
 
     if "description" not in columns:
         op.add_column(
             "tickets_status",
             sa.Column("description", sa.String(length=255), nullable=True),
+            schema="support",
         )
 
     op.execute(
         sa.text(
             """
-            INSERT INTO tickets_status (id, name, description)
+            INSERT INTO support.tickets_status (id, name, description)
             VALUES
                 (0, 'EM_ABERTO', 'Em aberto'),
                 (1, 'EM_ANDAMENTO', 'Em andamento'),
@@ -59,7 +60,7 @@ def downgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
 
-    if not inspector.has_table("tickets_status"):
+    if not inspector.has_table("tickets_status", schema="support"):
         return
 
-    op.execute(sa.text("DELETE FROM tickets_status WHERE id IN (0, 1, 2, 3)"))
+    op.execute(sa.text("DELETE FROM support.tickets_status WHERE id IN (0, 1, 2, 3)"))

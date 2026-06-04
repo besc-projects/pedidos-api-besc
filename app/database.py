@@ -8,6 +8,7 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from contextlib import asynccontextmanager
 from app.db.base import Base  # DeclarativeBase centralizado
+import app.models  # noqa: F401  # Ensure all SQLAlchemy models are imported and registered
 from sqlalchemy.orm import configure_mappers
 
 
