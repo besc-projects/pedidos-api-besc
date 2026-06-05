@@ -7,6 +7,7 @@ from app.schemas.ticket.divergence import (
     TicketDivergenceResponse,
     TicketDivergenceUpdate,
 )
+
 from app.services.ticket.divergence import (
     create_ticket_divergence,
     delete_ticket_divergence,

@@ -46,6 +46,33 @@ async def create_ticket_divergence(
     return TicketDivergenceResponse.model_validate(divergence, from_attributes=True)
 
 
+async def get_divergence_item_ids_by_ticket_number(
+    db: AsyncSession,
+    ticket_number: int,
+) -> list[int]:
+    query = (
+        select(TicketDivergence.item_id)
+        .join(Ticket)
+        .where(Ticket.ticket_number == ticket_number)
+    )
+    result = await db.execute(query)
+    item_ids = result.scalars().all()
+
+    if item_ids:
+        return item_ids
+
+    ticket_exists = await db.execute(
+        select(Ticket.id).where(Ticket.ticket_number == ticket_number)
+    )
+    if ticket_exists.scalar_one_or_none() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ticket not found",
+        )
+
+    return []
+
+
 async def get_ticket_divergences(
     db: AsyncSession, ticket_id: int
 ) -> list[TicketDivergenceResponse]:

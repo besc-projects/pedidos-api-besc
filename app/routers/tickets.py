@@ -15,6 +15,7 @@ from app.services.tickets import (
     update_ticket,
     delete_ticket,
 )
+from app.services.ticket.divergence import get_divergence_item_ids_by_ticket_number
 from app.routers.ticket.progress import router as progress_router
 from app.routers.ticket.divergence import router as divergence_router
 
@@ -51,6 +52,19 @@ async def list_tickets(
 async def get_ticket_by_number(ticket_number: int, db: AsyncSession = Depends(get_db)):
     """Busca um chamado por número de ticket."""
     return await get_ticket(db, ticket_number)
+
+
+@router.get(
+    "/{ticket_number}/divergences/items",
+    response_model=list[int],
+    status_code=status.HTTP_200_OK,
+)
+async def list_ticket_divergence_item_ids(
+    ticket_number: int,
+    db: AsyncSession = Depends(get_db),
+):
+    """Retorna os item_id das divergências de um ticket pelo número do ticket."""
+    return await get_divergence_item_ids_by_ticket_number(db, ticket_number)
 
 
 @router.post("/", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
