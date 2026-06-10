@@ -4,6 +4,8 @@ from fastapi import HTTPException
 from typing import List
 
 from app.models.tax_reference import TaxReferenceProductSupra as TaxReferenceModel
+from app.models.products import Product as ProductModel
+from app.models.orders import Order as OrderModel
 from app.schemas.tax_reference import (
     TaxReferenceCreate,
     TaxReferenceUpdate,
@@ -72,7 +74,31 @@ async def get_tax_reference_by_product(
     ]
 
 
-# 🟡 Get all
+# � Get by order number with linked product tax references
+async def get_products_with_tax_reference_by_order(
+    db: AsyncSession, vale_order_id: int
+) -> List[TaxReferenceResponse]:
+    """Retorna apenas as referências fiscais de produtos vinculados a um pedido."""
+    result = await db.execute(
+        select(TaxReferenceModel)
+        .join(ProductModel, TaxReferenceModel.id_product == ProductModel.id)
+        .join(OrderModel, OrderModel.id == ProductModel.order_id)
+        .where(OrderModel.vale_order_id == vale_order_id)
+    )
+
+    entries = result.scalars().all()
+    if not entries:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Nenhuma referência fiscal encontrada para o pedido {vale_order_id}",
+        )
+
+    return [
+        TaxReferenceResponse.model_validate(e, from_attributes=True) for e in entries
+    ]
+
+
+# �🟡 Get all
 async def get_all_tax_references(
     db: AsyncSession, skip: int = 0, limit: int = 100
 ) -> List[TaxReferenceResponse]:

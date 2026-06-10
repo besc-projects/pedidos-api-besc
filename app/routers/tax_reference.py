@@ -12,6 +12,7 @@ from app.services.tax_reference import (
     create_tax_reference,
     get_tax_reference_by_id,
     get_tax_reference_by_product,
+    get_products_with_tax_reference_by_order,
     get_all_tax_references,
     update_tax_reference,
     delete_tax_reference,
@@ -42,7 +43,18 @@ async def get_by_product(id_product: int, db: AsyncSession = Depends(get_db)):
     return await get_tax_reference_by_product(db, id_product)
 
 
-# 🟡 Get all
+# � Get by order number
+@router.get(
+    "/order/{vale_order_id}",
+    response_model=List[TaxReferenceResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Buscar referências fiscais por número de pedido",
+)
+async def get_by_order(vale_order_id: int, db: AsyncSession = Depends(get_db)):
+    return await get_products_with_tax_reference_by_order(db, vale_order_id)
+
+
+# �🟡 Get all
 @router.get(
     "/",
     response_model=List[TaxReferenceResponse],
