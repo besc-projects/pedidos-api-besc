@@ -6,6 +6,7 @@ from app.services.orders import (
     get_order_with_products,
     get_all_orders,
     get_orders_by_status,
+    get_orders_with_tax_reference_by_status,
     update_order_status,
     update_order,
     delete_order,
@@ -46,6 +47,21 @@ async def get_all_by_status(
         db=db,
         process_id=process_id,
         status_code=status_code,
+        skip=skip,
+        limit=limit,
+    )
+
+
+@router.get("/status/tax-reference")
+async def get_orders_with_tax_reference(
+    vale_order_id: int | None = Query(None),
+    skip: int = Query(0),
+    limit: int = Query(100),
+    db: AsyncSession = Depends(get_db),
+):
+    return await get_orders_with_tax_reference_by_status(
+        db=db,
+        vale_order_id=vale_order_id,
         skip=skip,
         limit=limit,
     )

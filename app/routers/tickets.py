@@ -67,6 +67,9 @@ async def list_ticket_divergence_item_ids(
     return await get_divergence_item_ids_by_ticket_number(db, ticket_number)
 
 
+
+
+
 @router.post("/", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
 async def create_ticket_route(
     ticket_data: TicketCreate,

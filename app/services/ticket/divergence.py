@@ -45,7 +45,6 @@ async def create_ticket_divergence(
     await db.refresh(divergence)
     return TicketDivergenceResponse.model_validate(divergence, from_attributes=True)
 
-
 async def get_divergence_item_ids_by_ticket_number(
     db: AsyncSession,
     ticket_number: int,
@@ -71,7 +70,6 @@ async def get_divergence_item_ids_by_ticket_number(
         )
 
     return []
-
 
 async def get_ticket_divergences(
     db: AsyncSession, ticket_id: int

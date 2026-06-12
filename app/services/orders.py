@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.orders import Order as OrderModel
 from app.models.proposals import Proposal as ProposalModel
 from app.models.products import Product as ProductModel
+from app.models.tax_reference import TaxReferenceProductSupra as TaxReferenceModel
 from app.schemas.orders import OrderCreate, OrderWithProducts, OrderUpdate
 from sqlalchemy.orm import selectinload
 
@@ -309,6 +310,95 @@ async def get_orders_by_status(
                 "status_code": status_code,
                 "total": len(orders_schema),
                 "orders": orders_schema,
+            }
+        ),
+    )
+
+
+async def get_orders_with_tax_reference_by_status(
+    db: AsyncSession,
+    vale_order_id: int | None = None,
+    skip: int = 0,
+    limit: int = 100,
+):
+    query = (
+        select(OrderModel, ProductModel, TaxReferenceModel)
+        .join(ProductModel, ProductModel.order_id == OrderModel.id)
+        .join(TaxReferenceModel, TaxReferenceModel.id_product == ProductModel.id)
+        .filter(
+            OrderModel.process_id == 2,
+            OrderModel.status_code == 1,
+        )
+        .offset(skip)
+        .limit(limit)
+    )
+
+    if vale_order_id is not None:
+        query = query.filter(OrderModel.vale_order_id == vale_order_id)
+
+    result = await db.execute(query)
+    rows = result.all()
+
+    if not rows:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "message": (
+                    f"No orders found for process_id=2, "
+                    f"status_code=1"
+                    + (
+                        f", vale_order_id={vale_order_id}"
+                        if vale_order_id is not None
+                        else ""
+                    )
+                )
+            },
+        )
+
+    orders_map = {}
+    order_seen_products = {}
+    for order, product, tax_ref in rows:
+        if order.id not in orders_map:
+            orders_map[order.id] = {
+                "vale_order_id": int(order.vale_order_id),
+                "state": str(order.state or "").strip().upper(),
+                "proposal_id": order.proposal_id,
+                "products": [],
+                "besc_order_id": order.besc_order_id,
+                "invoice_number": order.invoice_number,
+                "center": order.center,
+            }
+            order_seen_products[order.id] = set()
+
+        if tax_ref.id_product in order_seen_products[order.id]:
+            continue
+
+        order_seen_products[order.id].add(tax_ref.id_product)
+        orders_map[order.id]["products"].append(
+            {
+                "product_id": product.id,
+                "item": product.item,
+                "part_number": product.part_number,
+                "description": product.description,
+                "ncm_code": tax_ref.ncm_code,
+                "ipi": float(tax_ref.ipi) if tax_ref.ipi is not None else None,
+                "icms": float(tax_ref.icms) if tax_ref.icms is not None else None,
+                "icms_st": float(tax_ref.icms_st) if tax_ref.icms_st is not None else None,
+                "origin": tax_ref.origin,
+                "id_product": tax_ref.id_product,
+                "tax_reference_id": tax_ref.id,
+                "created_at": tax_ref.created_at,
+                "updated_at": tax_ref.updated_at,
+            }
+        )
+
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(
+            {
+                "message": "Orders retrieved successfully!",
+                "total": len(orders_map),
+                "orders": list(orders_map.values()),
             }
         ),
     )
