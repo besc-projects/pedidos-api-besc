@@ -54,6 +54,8 @@ async def get_all_by_status(
 
 @router.get("/status/tax-reference")
 async def get_orders_with_tax_reference(
+    process_id: int = Query(...),
+    status_code: int = Query(...),
     vale_order_id: int | None = Query(None),
     skip: int = Query(0),
     limit: int = Query(100),
@@ -61,6 +63,8 @@ async def get_orders_with_tax_reference(
 ):
     return await get_orders_with_tax_reference_by_status(
         db=db,
+        process_id=process_id,
+        status_code=status_code,
         vale_order_id=vale_order_id,
         skip=skip,
         limit=limit,
