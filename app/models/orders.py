@@ -4,7 +4,6 @@ from sqlalchemy import (
     Integer,
     String,
     Numeric,
-    ForeignKey,
     BigInteger,
 )
 from sqlalchemy.orm import relationship
@@ -31,29 +30,6 @@ class Order(Base):
     days_to_delivery = Column(String(50))
     date = Column(DateTime, nullable=False)
     version = Column(Integer, default=1)
-
-    proposal_id = Column(
-        Integer,
-        ForeignKey(
-            "commercial.proposals.id",
-            onupdate="CASCADE",
-            ondelete="SET NULL",
-        ),
-        nullable=True,
-    )
-
-    proposals = relationship(
-        "Proposal",
-        back_populates="order",
-    )
-
-    shipment = relationship(
-        "Shipment",
-        back_populates="order",
-        uselist=False,
-        cascade="all, delete-orphan",
-        single_parent=True,
-    )
 
     products = relationship(
         "Product",

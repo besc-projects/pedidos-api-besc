@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-JWT_SECRET = os.getenv("JWT.SECRET")
+# Prefer JWT_SECRET (valid env var name for Cloud Run); fall back to the legacy
+# dotted name for local .env backward compatibility.
+JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("JWT.SECRET")
 JWT_ALGORITHM: str = "HS256"
 
 

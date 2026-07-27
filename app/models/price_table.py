@@ -7,7 +7,7 @@ from app.db.base import Base
 
 
 class PriceTable(Base):
-    __tablename__ = "price_table"
+    __tablename__ = "prices"
 
     __table_args__ = (
         UniqueConstraint(
@@ -15,7 +15,7 @@ class PriceTable(Base):
             "destination",
             name="uq_price_table_pn_destination"
         ),
-        {"schema": "core"},
+        {"schema": "pricing"},
     )
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

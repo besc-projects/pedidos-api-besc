@@ -4,7 +4,7 @@ from app.database import Base
 
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "identity"}
 
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(120), unique=True, nullable=False)

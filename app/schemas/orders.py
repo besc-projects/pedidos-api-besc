@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 from datetime import datetime
-from app.schemas.products import ProductResponse, ProductBase
+from app.schemas.products import ProductBase
 
 
 class OrderBase(BaseModel):
@@ -16,7 +16,6 @@ class OrderBase(BaseModel):
     cnpj: str
     date: datetime
     days_to_delivery: Optional[str] = None
-    proposal_id: Optional[int] = None
     besc_order_id: Optional[int] = None
     contract_number: Optional[str] = None
     invoice_number: Optional[str] = None
@@ -29,13 +28,6 @@ class OrderBase(BaseModel):
 class OrderUpdater(BaseModel):
     process_id: int = Field(..., description="ID do processo do pedido")
     status_code: int = Field(..., description="Código do status do pedido")
-
-
-class OrderStatusFilter(BaseModel):
-    process_id: int
-    status_code: int
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 class OrderUpdate(BaseModel):
@@ -51,7 +43,6 @@ class OrderUpdate(BaseModel):
     cnpj: Optional[str] = None
     date: Optional[datetime] = None
     days_to_delivery: Optional[str] = None
-    proposal_id: Optional[int] = None
     besc_order_id: Optional[int] = None
     contract_number: Optional[str] = None
     invoice_number: Optional[str] = None
@@ -71,13 +62,5 @@ class OrderResponse(OrderBase):
     """Schema representing a single order."""
 
     id: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class OrderWithProducts(OrderResponse):
-    """Schema that includes related products."""
-
-    products: List[ProductResponse] = []
 
     model_config = ConfigDict(from_attributes=True)

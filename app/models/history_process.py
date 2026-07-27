@@ -10,7 +10,7 @@ from app.db.base import Base
 
 
 class HistoryProcess(Base):
-    __tablename__ = "history_process"
+    __tablename__ = "process_history"
     __table_args__ = {"schema": "audit"}
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)

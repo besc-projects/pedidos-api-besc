@@ -3,8 +3,8 @@ from app.db.base import Base
 
 
 class TaxReferenceProductSupra(Base):
-    __tablename__ = "tax_reference_product_supra"
-    __table_args__ = {"schema": "core"}
+    __tablename__ = "tax_references"
+    __table_args__ = {"schema": "pricing"}
 
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
     id_product = Column(Integer, nullable=False, index=True)

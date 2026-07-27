@@ -20,17 +20,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 from app.db.base import Base
 
-# Importar todos os modelos para que o alembic detecte
-from app.models.orders import Order
-from app.models.products import Product
-from app.models.proposals import Proposal
-from app.models.shipments import Shipment
-from app.models.tickets import Ticket
-from app.models.user import User
-from app.models.price_table import PriceTable
-from app.models.history_process import HistoryProcess
-from app.models.tax_reference import TaxReferenceProductSupra
-from app.models.status.tickets import TicketStatus
+# Importa o pacote de models para registrar todas as tabelas na metadata.
+import app.models  # noqa: F401
 
 target_metadata = Base.metadata
 
