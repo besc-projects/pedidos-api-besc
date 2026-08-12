@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, BigInteger, String, Numeric, TIMESTAMP, func
+from sqlalchemy import Column, Integer, BigInteger, String, Numeric, DateTime, func
 from app.db.base import Base
 
 
@@ -16,13 +16,13 @@ class TaxReferenceProductSupra(Base):
     origin = Column(String(50), nullable=True)
 
     created_at = Column(
-        TIMESTAMP,
+        DateTime,
         server_default=func.now(),
         nullable=False
     )
 
     updated_at = Column(
-        TIMESTAMP,
+        DateTime,
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False

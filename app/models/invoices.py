@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, ForeignKey, String, UniqueConstraint
+from sqlalchemy import BigInteger, Column, ForeignKey, Integer, String, UniqueConstraint
 
 from app.db.base import Base
 
@@ -11,7 +11,7 @@ class Invoice(Base):
     )
 
     order_id = Column(
-        BigInteger,
+        Integer,
         ForeignKey("core.orders.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

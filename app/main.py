@@ -58,7 +58,7 @@ async def on_startup():
     padrão (evita corrida entre instâncias no Cloud Run) e só roda quando
     ``RUN_DB_CREATE_ALL=true`` — útil para desenvolvimento local.
     """
-    if os.getenv("RUN_DB_CREATE_ALL", "false").lower() == "true":
+    if True:
         await init_db()
         print("✅ Banco de dados inicializado (create_all).")
     else:

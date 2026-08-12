@@ -19,10 +19,10 @@ class PriceTable(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    pn = Column(String, index=True, nullable=False)
+    pn = Column(String(255), index=True, nullable=False)
     long_description = Column(String, nullable=False)
     description = Column(String, nullable=False)
-    destination = Column(String, nullable=False)
+    destination = Column(String(255), nullable=False)
     unit_price = Column(Float, nullable=False)
 
     def __repr__(self):

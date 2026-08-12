@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, TIMESTAMP, Text
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 class Product(Base):
@@ -20,8 +20,8 @@ class Product(Base):
     unit_price = Column(Numeric(12, 2), default=0)
     material = Column(String(255))
     origin = Column(String(255))
-    payment_date = Column(TIMESTAMP, nullable=True)
-    billing_until = Column(TIMESTAMP, nullable=True)
+    payment_date = Column(DateTime, nullable=True)
+    billing_until = Column(DateTime, nullable=True)
 
     stock_status_id = Column(Integer, default=0)
     tickets_status_id = Column(Integer, default=None)

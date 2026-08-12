@@ -6,4 +6,5 @@ from .tickets import Ticket
 from .tickets import TicketProgress
 from .tickets import TicketDivergence
 from .status.tickets import TicketStatus
+from .tax_reference import TaxReferenceProductSupra
 
