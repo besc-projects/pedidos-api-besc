@@ -1,91 +1,31 @@
-name: Deploy API Manager Orders to Cloud Run
+name: Deploy to Windows (self-hosted)
 
 on:
   push:
-    branches: ["main"]
-
-env:
-  REGION: us-central1
-  REPOSITORY: docker-images
-  IMAGE_NAME: besc-api-manager-orders
-  SERVICE_NAME: besc-api-manager-orders
-  MIGRATE_JOB_NAME: besc-api-manager-orders-migrate
-  CLOUDSQL_INSTANCE: besc-475714:us-central1:besc-rpa
+    branches: [main]
+  workflow_dispatch: {}
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: [self-hosted, win-defense-besc-runner]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Install dependencies
-        run: uv sync --frozen
-
-      - name: Run tests
-        run: uv run pytest -q
-
-  build-and-deploy:
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up GCP credentials
-        uses: google-github-actions/auth@v2
+      # fetch-depth 1: nao precisamos de historico, so do estado atual.
+      # persist-credentials false: sem git ops depois do checkout.
+      - uses: actions/checkout@v4
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          fetch-depth: 1
+          persist-credentials: false
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-
-      - name: Build image
+      # A tarefa agendada que mantem o app no ar (pedidos-api-app) serve sempre
+      # deste diretorio fixo, que e diferente do workspace do runner. O .env
+      # com credenciais reais NAO vai pelo git - fica direto nesse diretorio,
+      # preservado pelo robocopy (nao esta em .git nem eh sobrescrito).
+      - name: Sync checkout to app dir and restart service
+        shell: powershell
         run: |
-          docker build -t "${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" .
-
-      - name: Push image (tagged by commit SHA)
-        run: |
-          docker push "${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-
-      - name: Tag and push as latest
-        run: |
-          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}"
-          docker tag "$IMAGE:${{ github.sha }}" "$IMAGE:latest"
-          docker push "$IMAGE:latest"
-
-      # Roda as migrations ANTES de trocar o tráfego. Se o job falhar, os
-      # steps seguintes (deploy do serviço) não executam.
-      - name: Deploy migration job
-        run: |
-          gcloud run jobs deploy ${{ env.MIGRATE_JOB_NAME }} \
-            --image "${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" \
-            --region ${{ env.REGION }} \
-            --set-cloudsql-instances ${{ env.CLOUDSQL_INSTANCE }} \
-            --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}" \
-            --command uv \
-            --args run,alembic,upgrade,head \
-            --max-retries 0
-
-      - name: Run migrations
-        run: |
-          gcloud run jobs execute ${{ env.MIGRATE_JOB_NAME }} \
-            --region ${{ env.REGION }} \
-            --wait
-
-      - name: Deploy service to Cloud Run
-        run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image "${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" \
-            --region ${{ env.REGION }} \
-            --platform managed \
-            --add-cloudsql-instances ${{ env.CLOUDSQL_INSTANCE }} \
-            --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }},JWT_SECRET=${{ secrets.JWT_SECRET }},ECHO_SQL=false,RUN_DB_CREATE_ALL=false" \
-            --quiet
+          $AppDir = 'C:\Users\cloud\pedidos-api-besc\app'
+          robocopy $env:GITHUB_WORKSPACE $AppDir /MIR /XD .git .venv /XF .env /NFL /NDL /NJH /NJS
+          if ($LASTEXITCODE -ge 8) { throw "robocopy falhou (exit $LASTEXITCODE)" }
+          Set-Location $AppDir
+          ./deploy/restart-service.ps1
+          exit $LASTEXITCODE
