@@ -19,5 +19,10 @@ if ((Test-Path (Join-Path $uvLocal 'uv.exe')) -and ($env:Path -notlike "*$uvLoca
     $env:Path = "$uvLocal;$env:Path"
 }
 
+# Sem isso, print() com emoji/acentos no codigo da app derruba o processo:
+# console do Windows usa cp1252 por padrao, que nao codifica esses caracteres.
+$env:PYTHONUTF8 = '1'
+$env:PYTHONIOENCODING = 'utf-8'
+
 & uv run uvicorn app.main:app --host 0.0.0.0 --port $Port `
     *> (Join-Path $AppDir 'app.log')
