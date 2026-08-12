@@ -11,7 +11,6 @@ dependencies = [
     "asyncpg>=0.30.0",
     "fastapi[standard]>=0.120.3",
     "greenlet>=3.2.4",
-    "jose>=1.0.0",
     "psycopg2-binary>=2.9.11",
     "pydantic-settings>=2.11.0",
     "pyjwt>=2.10.1",
