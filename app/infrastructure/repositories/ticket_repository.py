@@ -59,7 +59,7 @@ class SqlAlchemyTicketRepository:
         ticket_number: Optional[int],
         purchase_order: Optional[int],
     ) -> list[Ticket]:
-        query = select(TicketModel).offset(skip).limit(limit)
+        query = select(TicketModel).order_by(TicketModel.id).offset(skip).limit(limit)
         if status_id is not None:
             query = query.where(TicketModel.status_id == status_id)
         if ticket_number is not None:

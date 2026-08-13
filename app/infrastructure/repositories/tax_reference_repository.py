@@ -57,7 +57,10 @@ class SqlAlchemyTaxReferenceRepository:
 
     async def list(self, skip: int, limit: int) -> list[TaxReference]:
         result = await self._session.execute(
-            select(TaxReferenceModel).offset(skip).limit(limit)
+            select(TaxReferenceModel)
+            .order_by(TaxReferenceModel.id)
+            .offset(skip)
+            .limit(limit)
         )
         return [self._to_entity(model) for model in result.scalars().all()]
 

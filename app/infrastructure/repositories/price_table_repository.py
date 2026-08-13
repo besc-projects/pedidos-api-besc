@@ -45,7 +45,10 @@ class SqlAlchemyPriceTableRepository:
 
     async def list(self, skip: int, limit: int) -> list[PriceTableEntry]:
         result = await self._session.execute(
-            select(PriceTableModel).offset(skip).limit(limit)
+            select(PriceTableModel)
+            .order_by(PriceTableModel.id)
+            .offset(skip)
+            .limit(limit)
         )
         return [self._to_entity(model) for model in result.scalars().all()]
 

@@ -111,6 +111,7 @@ class SqlAlchemyOrderRepository:
                 OrderModel.process_id == process_id,
                 OrderModel.status_code == status_code,
             )
+            .order_by(OrderModel.id)
             .offset(skip)
             .limit(limit)
         )
@@ -131,6 +132,7 @@ class SqlAlchemyOrderRepository:
                 TaxReferenceModel.id_product == ProductModel.id,
             )
             .where(OrderModel.process_id == 2, OrderModel.status_code == 1)
+            .order_by(OrderModel.id, ProductModel.id)
             .offset(skip)
             .limit(limit)
         )
