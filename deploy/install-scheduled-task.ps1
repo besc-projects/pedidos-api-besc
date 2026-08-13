@@ -35,7 +35,7 @@ if (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue) {
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger `
     -Settings $settings -Principal $principal `
-    -Description 'Mantem a API de pedidos (uvicorn) no ar na porta 8004.' | Out-Null
+    -Description 'Mantem a API de pedidos (uvicorn) no ar na porta 9577.' | Out-Null
 
 Write-Output "Tarefa '$TaskName' registrada."
 Get-ScheduledTask -TaskName $TaskName | Select-Object TaskName, State | Format-Table -AutoSize | Out-String -Width 200

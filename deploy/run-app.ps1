@@ -6,7 +6,7 @@
 # incompativel com um servico de longa duracao gerenciado por tarefa agendada).
 param(
     [string]$AppDir = 'C:\Users\cloud\pedidos-api-besc\app',
-    [int]   $Port   = 8004
+    [int]   $Port   = 9577
 )
 
 $ErrorActionPreference = 'Continue'

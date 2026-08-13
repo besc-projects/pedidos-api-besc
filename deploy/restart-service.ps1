@@ -4,7 +4,7 @@
 $ErrorActionPreference = 'Continue'
 $ProgressPreference = 'SilentlyContinue'
 
-$Port     = 8004
+$Port     = 9577
 $TaskName = 'pedidos-api-app'
 
 $uvLocal = Join-Path $env:USERPROFILE '.local\bin'
