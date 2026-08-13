@@ -57,20 +57,17 @@ async def jwt_middleware(request: Request, call_next):
 
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
+        # Nao ecoar headers/token na resposta: alem de nao ajudar o cliente,
+        # devolvia o proprio Authorization para quem chamou.
         return JSONResponse(
             status_code=401,
-            content={
-                "detail": "Token ausente ou inválido"
-                + str(auth_header)
-                + str(request.url.path)
-                + str(request.headers)
-            },
+            content={"detail": "Token ausente ou inválido"},
         )
 
     token = auth_header.split(" ")[1]
 
     try:
-        decode(token, JWT_SECRET, algorithms=["HS256"])
+        payload = decode(token, JWT_SECRET, algorithms=["HS256"])
     except exceptions.ExpiredSignatureError:
         return JSONResponse(status_code=401, content={"detail": "Token expirado"})
     except exceptions.DecodeError:
@@ -79,6 +76,10 @@ async def jwt_middleware(request: Request, call_next):
         return JSONResponse(
             status_code=401, content={"detail": f"Erro no token: {str(e)}"}
         )
+
+    # O payload precisa ficar disponivel para as rotas: GET /api/users/me le
+    # request.state.user, que antes nunca era atribuido (resultava em 500).
+    request.state.user = payload
 
     response = await call_next(request)
     return response
