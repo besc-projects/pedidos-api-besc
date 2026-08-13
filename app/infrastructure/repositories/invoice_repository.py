@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.invoice import Invoice
 from app.models.invoices import Invoice as InvoiceModel
+from app.models.orders import Order as OrderModel
 
 
 class SqlAlchemyInvoiceRepository:
@@ -24,6 +25,14 @@ class SqlAlchemyInvoiceRepository:
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
+
+    async def order_exists(self, order_id: int) -> bool:
+        """Valida a FK antes do insert: sem isso um order_id inexistente
+        estoura IntegrityError e vaza como HTTP 500."""
+        result = await self._session.execute(
+            select(OrderModel.id).where(OrderModel.id == order_id)
+        )
+        return result.scalar_one_or_none() is not None
 
     async def get_by_id(self, invoice_id: int) -> Optional[Invoice]:
         result = await self._session.execute(

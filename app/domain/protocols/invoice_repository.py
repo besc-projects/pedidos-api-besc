@@ -12,6 +12,9 @@ class InvoiceRepositoryProtocol(Protocol):
     async def get_by_order_id(self, order_id: int) -> Optional[Invoice]:
         ...
 
+    async def order_exists(self, order_id: int) -> bool:
+        ...
+
     async def list(
         self,
         order_id: Optional[int] = None,
