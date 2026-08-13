@@ -22,7 +22,10 @@ class Ticket(Base):
     )
 
     ticket_number = Column(Integer, unique=True, nullable=True)
-    purchase_order = Column(BigInteger, unique=True, nullable=True)
+
+    # Sem unique: uma ordem de compra pode ter varios tickets. Os dados de
+    # producao migrados do Postgres tem 533 tickets para 376 POs distintas.
+    purchase_order = Column(BigInteger, nullable=True)
 
     opened_at = Column(Date, nullable=True)
     closed_at = Column(Date, nullable=True)
