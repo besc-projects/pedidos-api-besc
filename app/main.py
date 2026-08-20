@@ -2,9 +2,11 @@
 import os
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 # Importa rotas
 from app.core.security import jwt_middleware
+from app.api.routers.dashboard import router as router_dashboard
 from app.api.routers.orders import router as router_orders
 from app.api.routers.products import router as router_products
 from app.api.routers.auth import router as router_auth
@@ -29,6 +31,27 @@ app = FastAPI(
 
 app.middleware("http")(jwt_middleware)
 
+# O dashboard React roda em outra origem (Vite). O CORS é adicionado DEPOIS do
+# jwt_middleware de propósito: no Starlette o último middleware registrado fica
+# por fora, então o preflight OPTIONS é respondido sem passar pela checagem de
+# token — e o 401 de token ausente volta com os headers de CORS, permitindo que
+# o navegador leia a resposta em vez de reportar um erro de rede genérico.
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS", "http://localhost:5174,http://127.0.0.1:5174"
+    ).split(",")
+    if origin.strip()
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Standardized error responses for domain/application exceptions
 register_exception_handlers(app)
 
@@ -44,6 +67,7 @@ app.include_router(router_ticket_divergence, tags=["Ticket Divergence"])
 app.include_router(router_tax_reference, tags=["Tax Reference"])
 app.include_router(router_purchase_requests, tags=["Purchase Requests"])
 app.include_router(router_invoices, tags=["Invoices"])
+app.include_router(router_dashboard, tags=["Dashboard"])
 
 
 

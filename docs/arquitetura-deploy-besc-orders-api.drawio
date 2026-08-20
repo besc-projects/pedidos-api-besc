@@ -1,0 +1,142 @@
+<mxfile host="app.diagrams.net" version="28.2.5">
+  <diagram name="Visão do deploy" id="besc-deploy-1">
+    <mxGraphModel dx="1900" dy="1050" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1050" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F8FC;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="0" y="0" width="1900" height="1050" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bar" value="" style="rounded=1;arcSize=40;whiteSpace=wrap;html=1;fillColor=#0F6CBD;strokeColor=none;" parent="1" vertex="1">
+          <mxGeometry x="60" y="48" width="8" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="titulo" value="&lt;font style=&quot;font-size:28px&quot;&gt;&lt;b&gt;BESC · API de Pedidos — do commit à produção&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px; color:#5B6B7F&quot;&gt;Todo código vive no GitHub; a esteira leva a versão aprovada até o servidor dentro da rede Defense, onde a API é publicada.&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;fontSize=15;fontColor=#0F2136;spacingLeft=14;" parent="1" vertex="1">
+          <mxGeometry x="68" y="40" width="1100" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="zdef" value="&lt;b&gt;AMBIENTE DEFENSE&lt;/b&gt;&amp;nbsp;&amp;nbsp;·&amp;nbsp;&amp;nbsp;rede interna do cliente" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9AB6D4;strokeWidth=2;dashed=1;dashPattern=8 6;verticalAlign=top;align=left;spacingLeft=70;spacingTop=18;fontSize=14;fontColor=#2C4A66;" parent="1" vertex="1">
+          <mxGeometry x="60" y="170" width="470" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="zdef-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/active_directory/firewall.svg;" parent="1" vertex="1">
+          <mxGeometry x="80" y="182" width="42" height="38" as="geometry" />
+        </mxCell>
+
+        <mxCell id="api" value="&lt;font style=&quot;font-size:19px&quot;&gt;&lt;b&gt;API besc-orders-api&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px; color:#5B6B7F&quot;&gt;Pedidos, suprimentos e chamados&lt;br&gt;FastAPI · Python&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F0B429;strokeWidth=3;shadow=1;align=left;verticalAlign=middle;spacingLeft=100;fontSize=13;fontColor=#0F2136;" parent="1" vertex="1">
+          <mxGeometry x="95" y="245" width="400" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="api-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/app_services/API_Management_Services.svg;" parent="1" vertex="1">
+          <mxGeometry x="120" y="285" width="62" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="vault" value="&lt;b&gt;Vault Key Azure&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px; color:#5B6B7F&quot;&gt;segredos e credenciais&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DCE3EC;shadow=1;align=center;verticalAlign=bottom;spacingBottom=10;fontSize=14;fontColor=#0F2136;" parent="1" vertex="1">
+          <mxGeometry x="95" y="450" width="185" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="vault-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/security/Key_Vaults.svg;" parent="1" vertex="1">
+          <mxGeometry x="157" y="475" width="62" height="62" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sql" value="&lt;b&gt;SQL Server&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px; color:#5B6B7F&quot;&gt;base de pedidos&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DCE3EC;shadow=1;align=center;verticalAlign=bottom;spacingBottom=10;fontSize=14;fontColor=#0F2136;" parent="1" vertex="1">
+          <mxGeometry x="310" y="450" width="185" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="sql-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/databases/SQL_Server.svg;" parent="1" vertex="1">
+          <mxGeometry x="372" y="475" width="62" height="62" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-api-vault" value="lê segredos" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#9AB6D4;endArrow=blockThin;endFill=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;fontColor=#5B6B7F;labelBackgroundColor=#FFFFFF;" parent="1" source="api" target="vault" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-api-sql" value="grava e lê pedidos" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#9AB6D4;endArrow=blockThin;endFill=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=11;fontColor=#5B6B7F;labelBackgroundColor=#FFFFFF;" parent="1" source="api" target="sql" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="github" value="&lt;font style=&quot;font-size:20px; color:#FFFFFF&quot;&gt;&lt;b&gt;GitHub&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px; color:#C9D1D9&quot;&gt;Todo o código e o histórico&lt;br&gt;de implementação&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#24292E;strokeColor=none;shadow=1;align=left;verticalAlign=middle;spacingLeft=95;fontSize=13;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="650" y="245" width="270" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="github-ico" value="" style="dashed=0;outlineConnect=0;html=1;align=center;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;shape=mxgraph.weblogos.github;fillColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="678" y="286" width="60" height="59" as="geometry" />
+        </mxCell>
+
+        <mxCell id="runner" value="&lt;font style=&quot;font-size:20px&quot;&gt;&lt;b&gt;GitHub Runner&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px; color:#5B6B7F&quot;&gt;Executa o pipeline:&lt;br&gt;build, testes e publicação&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2088FF;strokeWidth=3;shadow=1;align=left;verticalAlign=middle;spacingLeft=100;fontSize=13;fontColor=#0F2136;" parent="1" vertex="1">
+          <mxGeometry x="1040" y="245" width="280" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="runner-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/general/Gear.svg;" parent="1" vertex="1">
+          <mxGeometry x="1068" y="285" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="zprod" value="&lt;b&gt;PRODUÇÃO&lt;/b&gt;&amp;nbsp;&amp;nbsp;·&amp;nbsp;&amp;nbsp;servidor dentro da Defense" style="rounded=1;arcSize=4;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9AB6D4;strokeWidth=2;dashed=1;dashPattern=8 6;verticalAlign=top;align=left;spacingLeft=70;spacingTop=18;fontSize=14;fontColor=#2C4A66;" parent="1" vertex="1">
+          <mxGeometry x="1440" y="170" width="400" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="zprod-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/active_directory/firewall.svg;" parent="1" vertex="1">
+          <mxGeometry x="1460" y="182" width="42" height="38" as="geometry" />
+        </mxCell>
+
+        <mxCell id="winserver" value="&lt;font style=&quot;font-size:19px&quot;&gt;&lt;b&gt;Windows Server&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px; color:#5B6B7F&quot;&gt;A API roda como serviço&lt;br&gt;e sobe junto com a máquina&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0F6CBD;strokeWidth=3;shadow=1;align=left;verticalAlign=middle;spacingLeft=100;fontSize=13;fontColor=#0F2136;" parent="1" vertex="1">
+          <mxGeometry x="1475" y="245" width="330" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="win-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/active_directory/windows_server.svg;" parent="1" vertex="1">
+          <mxGeometry x="1503" y="285" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="url" value="&lt;font style=&quot;color:#0F6CBD&quot;&gt;&lt;b&gt;http://besc-orders-api.defenseti.com.br:9577&lt;/b&gt;&lt;/font&gt;" style="rounded=1;arcSize=40;whiteSpace=wrap;html=1;fillColor=#EAF3FC;strokeColor=#BBD6EE;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="1475" y="404" width="330" height="38" as="geometry" />
+        </mxCell>
+
+        <mxCell id="users" value="&lt;b&gt;Quem consome&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px; color:#5B6B7F&quot;&gt;Dashboard BESC, robôs e integrações&lt;/font&gt;" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DCE3EC;shadow=1;align=center;verticalAlign=bottom;spacingBottom=10;fontSize=14;fontColor=#0F2136;" parent="1" vertex="1">
+          <mxGeometry x="1475" y="480" width="330" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="users-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/identity/Users.svg;" parent="1" vertex="1">
+          <mxGeometry x="1610" y="500" width="58" height="58" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-url-users" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;strokeColor=#9AB6D4;endArrow=blockThin;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="url" target="users" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#7B8FA6;endArrow=blockThin;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="api" target="github" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#7B8FA6;endArrow=blockThin;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="github" target="runner" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=3;strokeColor=#7B8FA6;endArrow=blockThin;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="runner" target="winserver" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b1" value="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#0F6CBD;strokeColor=#FFFFFF;strokeWidth=3;fontColor=#FFFFFF;fontSize=17;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="565" y="298" width="36" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="b1-lbl" value="&lt;b&gt;Toda feature ou atualização&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px; color:#5B6B7F&quot;&gt;commit e push do time&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=bottom;fillColor=#F5F8FC;strokeColor=none;fontSize=12;fontColor=#0F2136;spacing=2;" parent="1" vertex="1">
+          <mxGeometry x="499" y="222" width="146" height="68" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b2" value="2" style="ellipse;whiteSpace=wrap;html=1;fillColor=#0F6CBD;strokeColor=#FFFFFF;strokeWidth=3;fontColor=#FFFFFF;fontSize=17;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="962" y="298" width="36" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="b2-lbl" value="&lt;b&gt;CI/CD&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px; color:#5B6B7F&quot;&gt;dispara a esteira&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=bottom;fillColor=#F5F8FC;strokeColor=none;fontSize=12;fontColor=#0F2136;spacing=2;" parent="1" vertex="1">
+          <mxGeometry x="922" y="222" width="116" height="68" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b3" value="3" style="ellipse;whiteSpace=wrap;html=1;fillColor=#0F6CBD;strokeColor=#FFFFFF;strokeWidth=3;fontColor=#FFFFFF;fontSize=17;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="1362" y="298" width="36" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="b3-lbl" value="&lt;b&gt;Atualizar o código no ambiente Defense&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px; color:#5B6B7F&quot;&gt;nova versão no servidor&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=bottom;fillColor=#F5F8FC;strokeColor=none;fontSize=12;fontColor=#0F2136;spacing=2;" parent="1" vertex="1">
+          <mxGeometry x="1324" y="206" width="148" height="84" as="geometry" />
+        </mxCell>
+
+        <mxCell id="resumo" value="&lt;font style=&quot;font-size:15px&quot;&gt;&lt;b&gt;A visão em uma frase&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px; color:#3D5166&quot;&gt;O código nasce e roda dentro da rede Defense, mas a &lt;b&gt;fonte da verdade é o GitHub&lt;/b&gt;: nada entra em produção sem passar pelo repositório e pela esteira. Assim toda mudança fica versionada, auditável e reversível — e o servidor de produção nunca é editado à mão.&lt;/font&gt;" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DCE3EC;shadow=1;align=left;verticalAlign=top;spacingLeft=22;spacingTop=14;spacingRight=18;fontSize=13;fontColor=#0F2136;" parent="1" vertex="1">
+          <mxGeometry x="60" y="720" width="620" height="172" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nota" value="&lt;font style=&quot;font-size:15px&quot;&gt;&lt;b&gt;Restrição de rede — como o deploy acontece hoje&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:13px; color:#3D5166&quot;&gt;A allowlist de saída da VM bloqueia &lt;i&gt;pipelines*.actions.githubusercontent.com&lt;/i&gt;, então o runner do GitHub Actions (hospedado ou self-hosted) &lt;b&gt;não consegue receber job&lt;/b&gt; nessa máquina.&lt;br&gt;&lt;br&gt;Enquanto a rede não liberar esse domínio, o passo 3 é feito por &lt;b&gt;polling&lt;/b&gt;: uma tarefa agendada no Windows roda &lt;i&gt;git fetch&lt;/i&gt; a cada 5 minutos e só redeploya quando o HEAD local difere de &lt;i&gt;origin/main&lt;/i&gt; — mesmo efeito, sem depender do Actions.&lt;/font&gt;" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFF8E6;strokeColor=#F0B429;strokeWidth=2;align=left;verticalAlign=top;spacingLeft=100;spacingTop=14;spacingRight=20;fontSize=13;fontColor=#0F2136;" parent="1" vertex="1">
+          <mxGeometry x="720" y="720" width="1120" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="nota-ico" value="" style="image;aspect=fixed;html=1;points=[];image=img/lib/azure2/general/Scheduler.svg;" parent="1" vertex="1">
+          <mxGeometry x="742" y="772" width="58" height="58" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
