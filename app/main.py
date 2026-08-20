@@ -19,7 +19,7 @@ from app.api.routers.tax_reference import router as router_tax_reference
 from app.api.routers.purchase_requests import router as router_purchase_requests
 from app.api.routers.invoices import router as router_invoices
 from app.api.middlewares.exception_handlers import register_exception_handlers
-
+#
 from app.database import init_db
 
 # Cria instância principal da aplicação
