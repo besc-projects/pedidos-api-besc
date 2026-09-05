@@ -16,16 +16,19 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      # A tarefa agendada que mantem o app no ar (pedidos-api-app) serve sempre
-      # deste diretorio fixo, que e diferente do workspace do runner. O .env
-      # com credenciais reais NAO vai pelo git - fica direto nesse diretorio,
+      # A API roda sob IIS (httpPlatformHandler, ver web.config) neste
+      # diretorio fixo, diferente do workspace do runner. O .env com
+      # credenciais reais NAO vai pelo git - fica direto nesse diretorio,
       # preservado pelo robocopy (nao esta em .git nem eh sobrescrito).
-      - name: Sync checkout to app dir and restart service
+      # web.config agora e versionado: o /MIR o mantem sempre atualizado em
+      # vez de depender de alguem colocar/manter esse arquivo manualmente no
+      # servidor (o que o deixava vulneravel a ser apagado no proximo deploy).
+      - name: Sync checkout to app dir and recycle IIS app pool
         shell: powershell
         run: |
           $AppDir = 'C:\Users\cloud\pedidos-api-besc\app'
           robocopy $env:GITHUB_WORKSPACE $AppDir /MIR /XD .git .venv /XF .env /NFL /NDL /NJH /NJS
           if ($LASTEXITCODE -ge 8) { throw "robocopy falhou (exit $LASTEXITCODE)" }
           Set-Location $AppDir
-          ./deploy/restart-service.ps1
+          ./deploy/recycle-app-pool.ps1
           exit $LASTEXITCODE
