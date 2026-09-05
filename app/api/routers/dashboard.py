@@ -814,23 +814,31 @@ async def get_execution_summary(
     estoque; ``nao_faturado_outros`` é o resto (fiscal, integração, etc.), obtido
     por diferença — não depende de instrumentação que ainda não existe.
     """
+    # SQL Server (erro 130) proíbe subquery correlacionada dentro do argumento
+    # de count()/sum(), mesmo em contexto booleano — então o EXISTS do
+    # FALTA_ESTOQUE precisa virar coluna simples num CTE antes de ser agregado.
     pedidos = await _row(db, f"""
+        WITH pedidos_periodo AS (
+          SELECT o.*,
+                 CASE WHEN {FALTA_ESTOQUE} THEN 1 ELSE 0 END AS falta_estoque
+          FROM core.orders o WHERE {f.where}
+        )
         SELECT
           count(*) AS processados,
           count(CASE WHEN {FATURADO} THEN 1 END) AS faturados,
           count(CASE WHEN {CONFIRMADO} THEN 1 END) AS confirmados,
           count(CASE WHEN {CANCELADO} THEN 1 END) AS cancelados,
           count(CASE WHEN {EM_ANDAMENTO} THEN 1 END) AS em_andamento,
-          count(CASE WHEN ({EM_ANDAMENTO}) AND {FALTA_ESTOQUE} THEN 1 END)
+          count(CASE WHEN ({EM_ANDAMENTO}) AND falta_estoque = 1 THEN 1 END)
             AS bloqueados_estoque,
           coalesce(sum(CASE WHEN {FATURADO} THEN o.total_value END), 0)
             AS valor_faturado,
           coalesce(sum(CASE WHEN {EM_ANDAMENTO} THEN o.total_value END), 0)
             AS valor_nao_faturado,
-          coalesce(sum(CASE WHEN ({EM_ANDAMENTO}) AND {FALTA_ESTOQUE}
+          coalesce(sum(CASE WHEN ({EM_ANDAMENTO}) AND falta_estoque = 1
                              THEN o.total_value END), 0)
             AS valor_nao_faturado_estoque
-        FROM core.orders o WHERE {f.where}
+        FROM pedidos_periodo o
     """, f.params)
 
     divergentes = await _row(db, f"""
