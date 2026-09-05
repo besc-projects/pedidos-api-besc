@@ -32,6 +32,16 @@ CANCELADO = "o.status_code = 5"
 CONFIRMADO = "o.process_id = 1 AND o.status_code = 3"
 EM_ANDAMENTO = f"NOT ({FATURADO}) AND NOT ({CANCELADO})"
 
+# Pedido travado por estoque: tem ao menos um item ainda pendente de compra.
+# ``EXISTS`` em vez de JOIN para não multiplicar a linha do pedido por item.
+FALTA_ESTOQUE = """EXISTS (
+            SELECT 1 FROM purchasing.purchase_requests pr
+            WHERE pr.order_id = o.id AND pr.status = 'PENDING'
+          )"""
+
+# Chamado ainda em aberto: mesma regra do /tickets/summary (0, 1 e 3 = reaberto).
+CHAMADO_ABERTO = "t.status_id IN (0, 1, 3)"
+
 STATUS_CASE = """
         CASE
           WHEN o.process_id = 1 AND o.status_code = 4 THEN 'Concretizado'
@@ -785,3 +795,140 @@ async def search_products(
         WHERE pn LIKE :q OR description LIKE :q OR long_description LIKE :q
         ORDER BY pn
     """, {"q": f"%{q}%", "limit": limit})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Relatórios por e-mail (comercial-report)
+#
+# Os três endpoints abaixo alimentam os relatórios enviados por e-mail — o
+# diário (pendências e execuções) e o semanal (performance). Como no resto do
+# router, quem soma é o banco: o robô só formata o que chega.
+# ─────────────────────────────────────────────────────────────────────────────
+@router.get("/execution/summary", summary="Resumo de execução do período (relatórios por e-mail)")
+async def get_execution_summary(
+    f: OrderFilters = Depends(), db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Pedidos, valores e bloqueios do período, já separados por causa.
+
+    ``nao_faturado_estoque`` é a fatia do valor em andamento presa em falta de
+    estoque; ``nao_faturado_outros`` é o resto (fiscal, integração, etc.), obtido
+    por diferença — não depende de instrumentação que ainda não existe.
+    """
+    pedidos = await _row(db, f"""
+        SELECT
+          count(*) AS processados,
+          count(CASE WHEN {FATURADO} THEN 1 END) AS faturados,
+          count(CASE WHEN {CONFIRMADO} THEN 1 END) AS confirmados,
+          count(CASE WHEN {CANCELADO} THEN 1 END) AS cancelados,
+          count(CASE WHEN {EM_ANDAMENTO} THEN 1 END) AS em_andamento,
+          count(CASE WHEN ({EM_ANDAMENTO}) AND {FALTA_ESTOQUE} THEN 1 END)
+            AS bloqueados_estoque,
+          coalesce(sum(CASE WHEN {FATURADO} THEN o.total_value END), 0)
+            AS valor_faturado,
+          coalesce(sum(CASE WHEN {EM_ANDAMENTO} THEN o.total_value END), 0)
+            AS valor_nao_faturado,
+          coalesce(sum(CASE WHEN ({EM_ANDAMENTO}) AND {FALTA_ESTOQUE}
+                             THEN o.total_value END), 0)
+            AS valor_nao_faturado_estoque
+        FROM core.orders o WHERE {f.where}
+    """, f.params)
+
+    divergentes = await _row(db, f"""
+        SELECT count(DISTINCT o.id) AS pedidos_com_divergencia
+        FROM core.orders o
+        JOIN support.tickets t ON t.order_id = o.id
+        JOIN support.ticket_divergences d ON d.ticket_id = t.id
+        WHERE {f.where}
+    """, f.params)
+
+    # Chamados são datados por ``opened_at``, não pela data do pedido: o filtro
+    # de período do pedido não se aplica, só o intervalo em si (quando houver).
+    periodo = {k: v for k, v in f.params.items() if k in ("d1", "d2")}
+    janela = (
+        "t.opened_at >= :d1 AND t.opened_at < DATEADD(day, 1, :d2)"
+        if periodo else "1=1"
+    )
+    chamados = await _row(db, f"""
+        SELECT count(CASE WHEN {janela} THEN 1 END) AS abertos_no_periodo,
+               count(CASE WHEN {CHAMADO_ABERTO} THEN 1 END) AS em_aberto_total
+        FROM support.tickets t
+    """, periodo)
+
+    itens = await _row(db, """
+        SELECT count(*) AS itens_pendentes_compra
+        FROM purchasing.purchase_requests WHERE status = 'PENDING'
+    """)
+
+    nao_faturado = float(pedidos.get("valor_nao_faturado") or 0)
+    por_estoque = float(pedidos.get("valor_nao_faturado_estoque") or 0)
+    return {
+        "pedidos": pedidos,
+        "valores": {
+            "faturado": pedidos.get("valor_faturado"),
+            "nao_faturado": nao_faturado,
+            "nao_faturado_estoque": por_estoque,
+            "nao_faturado_outros": round(nao_faturado - por_estoque, 2),
+        },
+        "chamados": {**chamados, **divergentes},
+        "estoque": itens,
+    }
+
+
+@router.get("/actions/supply", summary="Ações de Suprimentos: itens pendentes de compra, com valor")
+async def get_supply_actions(
+    limit: int = Query(50, ge=1, le=500), db: AsyncSession = Depends(get_db)
+) -> list[dict]:
+    """Itens ainda pendentes de compra, do mais antigo para o mais novo.
+
+    O valor do que falta comprar vem de ``core.products``: a solicitação guarda
+    só as quantidades. O ``OUTER APPLY`` pega uma linha de produto por PN — um
+    JOIN duplicaria a solicitação se o mesmo PN aparecesse duas vezes no pedido.
+    """
+    return await _rows(db, """
+        SELECT TOP (:limit)
+               o.vale_order_id AS pedido, pr.order_id AS order_id,
+               p.item AS item, pr.part_number AS pn, p.description AS descricao,
+               pr.supplier_product_code AS codigo_fornecedor,
+               pr.requested_quantity AS solicitado,
+               pr.released_quantity AS liberado,
+               GREATEST(pr.requested_quantity - pr.released_quantity, 0) AS faltante,
+               p.unit_price AS valor_unitario,
+               GREATEST(pr.requested_quantity - pr.released_quantity, 0)
+                 * coalesce(p.unit_price, 0) AS valor_faltante,
+               DATEDIFF(day, pr.created_at, SYSDATETIMEOFFSET()) AS dias
+        FROM purchasing.purchase_requests pr
+        JOIN core.orders o ON o.id = pr.order_id
+        OUTER APPLY (
+            SELECT TOP (1) pp.item, pp.description, pp.unit_price
+            FROM core.products pp
+            WHERE pp.order_id = pr.order_id AND pp.part_number = pr.part_number
+            ORDER BY pp.id
+        ) p
+        WHERE pr.status = 'PENDING'
+        ORDER BY pr.created_at ASC
+    """, {"limit": limit})
+
+
+@router.get("/actions/tax", summary="Ações do Fiscal: divergências dos chamados em aberto")
+async def get_tax_actions(
+    limit: int = Query(50, ge=1, le=500), db: AsyncSession = Depends(get_db)
+) -> list[dict]:
+    """Divergências dos chamados ainda abertos, do mais recente para o mais antigo.
+
+    ``base_legal`` e ``impostos`` são texto livre vindo do chamado — a tabela não
+    classifica o tipo da divergência (NCM, imposto...), então o e-mail mostra o
+    texto como está.
+    """
+    return await _rows(db, f"""
+        SELECT TOP (:limit)
+               t.ticket_number AS chamado, t.purchase_order AS pedido,
+               d.purchase_order_line AS linha, d.item_id AS item,
+               d.legal_basis AS base_legal, d.taxes AS impostos,
+               t.opened_at AS aberto_em,
+               coalesce(ts.name, CONCAT('status ', t.status_id)) AS status
+        FROM support.ticket_divergences d
+        JOIN support.tickets t ON t.id = d.ticket_id
+        LEFT JOIN support.tickets_status ts ON ts.id = t.status_id
+        WHERE {CHAMADO_ABERTO}
+        ORDER BY t.opened_at DESC, t.id DESC
+    """, {"limit": limit})
