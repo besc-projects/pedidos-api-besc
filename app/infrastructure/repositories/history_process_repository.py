@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 from sqlalchemy import func, select
@@ -71,6 +72,24 @@ class SqlAlchemyHistoryProcessRepository:
             .where(
                 HistoryProcessModel.order_id == order_id,
                 HistoryProcessModel.step == step,
+            )
+            .order_by(HistoryProcessModel.occurred_at.desc())
+        )
+        return [self._to_entity(model) for model in result.scalars().all()]
+
+    async def list_by_step_and_date(
+        self, step: str, day: date
+    ) -> list[HistoryProcessEntry]:
+        # Faixa de datetime em vez de CAST(occurred_at AS DATE): funciona
+        # igual em qualquer dialeto e não perde índice em occurred_at.
+        start = datetime.combine(day, datetime.min.time())
+        end = start + timedelta(days=1)
+        result = await self._session.execute(
+            select(HistoryProcessModel)
+            .where(
+                HistoryProcessModel.step == step,
+                HistoryProcessModel.occurred_at >= start,
+                HistoryProcessModel.occurred_at < end,
             )
             .order_by(HistoryProcessModel.occurred_at.desc())
         )

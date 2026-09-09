@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.use_cases.history_process.use_cases import (
     CreateHistoryProcessUseCase,
     ListHistoryProcessByOrderUseCase,
+    ListHistoryProcessByStepAndDateUseCase,
     ListHistoryProcessByStepUseCase,
     ListHistoryProcessUseCase,
 )
@@ -52,3 +53,11 @@ def get_list_history_process_by_step_use_case(
     ),
 ) -> ListHistoryProcessByStepUseCase:
     return ListHistoryProcessByStepUseCase(repository)
+
+
+def get_list_history_process_by_step_and_date_use_case(
+    repository: HistoryProcessRepositoryProtocol = Depends(
+        get_history_process_repository
+    ),
+) -> ListHistoryProcessByStepAndDateUseCase:
+    return ListHistoryProcessByStepAndDateUseCase(repository)

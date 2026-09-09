@@ -1,3 +1,5 @@
+from datetime import date
+
 from app.domain.entities.history_process_entry import HistoryProcessEntry
 from app.domain.exceptions import ConflictException, NotFoundException
 from app.domain.protocols.history_process_repository import (
@@ -75,3 +77,20 @@ class ListHistoryProcessByStepUseCase:
                 f"No history found for order {order_id} and step '{step}'."
             )
         return items
+
+
+class ListHistoryProcessByStepAndDateUseCase:
+    """List history events of a step across ALL orders, on a given day.
+
+    Para digests (ex.: comercial-report perguntando "quais pedidos
+    avançaram de status hoje") — diferente de ListHistoryProcessByStepUseCase,
+    que exige um order_id conhecido de antemão. Lista vazia é o caso normal
+    (nada aconteceu naquele dia), não um erro — quem chama decide o que
+    fazer, sem 404.
+    """
+
+    def __init__(self, repository: HistoryProcessRepositoryProtocol) -> None:
+        self._repository = repository
+
+    async def execute(self, step: str, day: date) -> list[HistoryProcessEntry]:
+        return await self._repository.list_by_step_and_date(step, day)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from typing import Optional, Protocol
 
 from app.domain.entities.history_process_entry import HistoryProcessEntry
@@ -25,6 +26,14 @@ class HistoryProcessRepositoryProtocol(Protocol):
     async def list_by_step(
         self, order_id: int, step: str
     ) -> list[HistoryProcessEntry]:
+        ...
+
+    async def list_by_step_and_date(
+        self, step: str, day: date
+    ) -> list[HistoryProcessEntry]:
+        """Eventos de um step em TODOS os pedidos, ocorridos num dia — para
+        digests (ex.: "quais pedidos avançaram de status hoje"), diferente
+        de list_by_step (que já exige um order_id conhecido)."""
         ...
 
     async def create(self, entry: HistoryProcessEntry) -> HistoryProcessEntry:

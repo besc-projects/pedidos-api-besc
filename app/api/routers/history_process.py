@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -5,12 +7,14 @@ from fastapi.responses import JSONResponse
 from app.api.dependencies.history_process import (
     get_create_history_process_use_case,
     get_list_history_process_by_order_use_case,
+    get_list_history_process_by_step_and_date_use_case,
     get_list_history_process_by_step_use_case,
     get_list_history_process_use_case,
 )
 from app.application.use_cases.history_process.use_cases import (
     CreateHistoryProcessUseCase,
     ListHistoryProcessByOrderUseCase,
+    ListHistoryProcessByStepAndDateUseCase,
     ListHistoryProcessByStepUseCase,
     ListHistoryProcessUseCase,
 )
@@ -103,6 +107,39 @@ async def get_by_step(
             {
                 "order_id": order_id,
                 "step": step,
+                "total": len(items),
+                "items": [
+                    HistoryProcessResponse.model_validate(item, from_attributes=True)
+                    for item in items
+                ],
+            }
+        ),
+    )
+
+
+@router.get(
+    "/step/{step}",
+    summary="List history events of a step across all orders, on a given day",
+    description=(
+        "Para digests diários (ex.: comercial-report) — 'quais pedidos "
+        "avançaram nesse step hoje', sem precisar saber o order_id de "
+        "antemão. Sem resultado no dia é lista vazia, não erro."
+    ),
+)
+async def get_by_step_and_date(
+    step: str,
+    day: date = Query(default_factory=date.today, description="Dia apurado (AAAA-MM-DD); padrão hoje"),
+    use_case: ListHistoryProcessByStepAndDateUseCase = Depends(
+        get_list_history_process_by_step_and_date_use_case
+    ),
+) -> JSONResponse:
+    items = await use_case.execute(step, day)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder(
+            {
+                "step": step,
+                "day": day.isoformat(),
                 "total": len(items),
                 "items": [
                     HistoryProcessResponse.model_validate(item, from_attributes=True)
