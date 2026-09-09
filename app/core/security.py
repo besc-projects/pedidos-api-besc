@@ -41,12 +41,15 @@ def decode_token(token: str):
         return None
 
 
+# Sob o IIS a API é servida em /api (o dashboard React ocupa a raiz do mesmo
+# site), então a documentação também vive sob /api — ver docs_url em app/main.py.
 EXCLUDED_PATHS = [
     "/api/users/register",
     "/api/users/login",
-    "/docs",
-    "/openapi.json",
-    "/health",
+    "/api/docs",
+    "/api/redoc",
+    "/api/openapi.json",
+    "/api/health",
 ]
 
 

@@ -16,7 +16,6 @@ from sqlalchemy.orm import configure_mappers
 # CONFIGURAÇÃO: URL & Engine
 # ================================
 DATABASE_URL = os.getenv("DATABASE_URL")
-print(DATABASE_URL)
 ECHO_SQL = os.getenv("ECHO_SQL", "true").lower() == "true"
 
 
