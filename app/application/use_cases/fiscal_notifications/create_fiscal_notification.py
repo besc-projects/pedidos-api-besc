@@ -9,9 +9,12 @@ class CreateFiscalNotificationUseCase:
     """Register that a product's missing-fiscal-registration warning was sent.
 
     Idempotent by design: this marks a "1x forever" event (see
-    besc-commercial-pre-orders), so calling it twice for the same part_number
-    just returns the existing record instead of erroring — the caller doesn't
-    need to check-then-create defensively.
+    besc-commercial-report's cadastro-fiscal report), so calling it twice for
+    the same part_number just returns the existing record instead of
+    erroring — the caller doesn't need to check-then-create defensively.
+    `vale_order_id` is only stored on the first call (the order that actually
+    triggered the notification); a later call for the same part_number does
+    not overwrite it, since dedup already guarantees there won't be one.
     """
 
     def __init__(self, repository: FiscalNotificationRepositoryProtocol) -> None:
@@ -22,5 +25,7 @@ class CreateFiscalNotificationUseCase:
         if existing is not None:
             return existing
 
-        notification = FiscalNotification(part_number=data.part_number)
+        notification = FiscalNotification(
+            part_number=data.part_number, vale_order_id=data.vale_order_id
+        )
         return await self._repository.create(notification)

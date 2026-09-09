@@ -13,6 +13,7 @@ class FiscalNotification:
         self,
         *,
         part_number: str,
+        vale_order_id: Optional[int] = None,
         id: Optional[int] = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
@@ -22,5 +23,6 @@ class FiscalNotification:
 
         self.id = id
         self.part_number = part_number.strip()
+        self.vale_order_id = vale_order_id
         self.created_at = created_at
         self.updated_at = updated_at

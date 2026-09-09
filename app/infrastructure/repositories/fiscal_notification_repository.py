@@ -18,6 +18,7 @@ class SqlAlchemyFiscalNotificationRepository:
         return FiscalNotification(
             id=model.id,
             part_number=model.part_number,
+            vale_order_id=model.vale_order_id,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -32,7 +33,10 @@ class SqlAlchemyFiscalNotificationRepository:
         return self._to_entity(model) if model else None
 
     async def create(self, notification: FiscalNotification) -> FiscalNotification:
-        model = FiscalNotificationModel(part_number=notification.part_number)
+        model = FiscalNotificationModel(
+            part_number=notification.part_number,
+            vale_order_id=notification.vale_order_id,
+        )
         self._session.add(model)
         await self._session.flush()
         await self._session.refresh(model)
