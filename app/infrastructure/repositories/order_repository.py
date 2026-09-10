@@ -209,6 +209,11 @@ class SqlAlchemyOrderRepository:
                     "origin": tax_ref.origin,
                     "id_product": tax_ref.id_product,
                     "tax_reference_id": tax_ref.id,
+                    # Status do item no fluxo de chamado (0 = pendente de
+                    # chamado, 2 = já resolvido) — o besc-ticket-management
+                    # filtra por isso pra montar o formulário só com os itens
+                    # que de fato divergem, não todo item que tem referência.
+                    "tickets_status_id": product.tickets_status_id,
                     "created_at": tax_ref.created_at,
                     "updated_at": tax_ref.updated_at,
                 }
