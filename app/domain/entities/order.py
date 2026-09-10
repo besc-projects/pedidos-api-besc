@@ -25,3 +25,7 @@ class Order:
     id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    # Preenchido só por list_by_process_status via join com support.tickets —
+    # `ticket_id` é o id interno do chamado, não o número que o time vê
+    # (support.tickets.ticket_number). Não é uma coluna de core.orders.
+    ticket_number: Optional[int] = None

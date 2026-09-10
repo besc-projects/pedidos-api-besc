@@ -10,6 +10,7 @@ from app.domain.entities.product import Product
 from app.models.orders import Order as OrderModel
 from app.models.products import Product as ProductModel
 from app.models.tax_reference import TaxReferenceProductSupra as TaxReferenceModel
+from app.models.tickets.tickets_base import Ticket as TicketModel
 
 _ORDER_FIELDS = (
     "vale_order_id",
@@ -116,10 +117,29 @@ class SqlAlchemyOrderRepository:
             .limit(limit)
         )
         orders = result.scalars().unique().all()
-        return [
-            (self._to_entity(model), await self._products_for(model.id))
-            for model in orders
-        ]
+
+        # ticket_id -> ticket_number, via support.tickets.id (não
+        # purchase_order: um vale_order_id pode ter vários tickets ao longo
+        # do tempo — 533 tickets para 376 POs distintas na produção migrada
+        # — então só o id específico que o pedido aponta é inequívoco).
+        ticket_ids = [m.ticket_id for m in orders if m.ticket_id is not None]
+        ticket_numbers: dict[int, int] = {}
+        if ticket_ids:
+            ticket_rows = await self._session.execute(
+                select(TicketModel.id, TicketModel.ticket_number).where(
+                    TicketModel.id.in_(ticket_ids)
+                )
+            )
+            ticket_numbers = {
+                tid: tnum for tid, tnum in ticket_rows.all() if tnum is not None
+            }
+
+        entities: list[tuple[Order, list[Product]]] = []
+        for model in orders:
+            entity = self._to_entity(model)
+            entity.ticket_number = ticket_numbers.get(model.ticket_id)
+            entities.append((entity, await self._products_for(model.id)))
+        return entities
 
     async def list_with_tax_reference(
         self, vale_order_id: Optional[int], skip: int, limit: int

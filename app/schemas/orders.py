@@ -7,6 +7,9 @@ from app.schemas.products import ProductBase
 class OrderBase(BaseModel):
     vale_order_id: int
     ticket_id: Optional[int] = None
+    # Só vem preenchido em /api/orders/status (join com support.tickets) — o
+    # número de chamado que o time vê, diferente de ticket_id (id interno).
+    ticket_number: Optional[int] = None
     process_id: int = 0
     status_code: int = 0
     total_value: float
