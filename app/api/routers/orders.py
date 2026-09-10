@@ -106,11 +106,22 @@ async def get_orders_with_tax_reference(
     vale_order_id: Optional[int] = Query(None),
     skip: int = Query(0),
     limit: int = Query(100),
+    process_id: int = Query(2),
+    status_code: int = Query(
+        1,
+        description=(
+            "1 (padrão) = pedidos que ainda precisam de chamado, consumido "
+            "pelo besc-ticket-management; 2 = pedidos com chamado já aberto, "
+            "consumido pelo besc-commercial-report."
+        ),
+    ),
     use_case: ListOrdersWithTaxReferenceUseCase = Depends(
         get_list_orders_with_tax_reference_use_case
     ),
 ) -> JSONResponse:
-    orders = await use_case.execute(vale_order_id, skip, limit)
+    orders = await use_case.execute(
+        vale_order_id, skip, limit, process_id, status_code
+    )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=jsonable_encoder(

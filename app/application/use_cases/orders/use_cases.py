@@ -83,13 +83,21 @@ class ListOrdersWithTaxReferenceUseCase:
         self._repository = repository
 
     async def execute(
-        self, vale_order_id: Optional[int], skip: int, limit: int
+        self,
+        vale_order_id: Optional[int],
+        skip: int,
+        limit: int,
+        process_id: int = 2,
+        status_code: int = 1,
     ) -> list[dict]:
         orders = await self._repository.list_with_tax_reference(
-            vale_order_id, skip, limit
+            vale_order_id, skip, limit, process_id, status_code
         )
         if not orders:
-            message = "No orders found for process_id=2, status_code=1"
+            message = (
+                f"No orders found for process_id={process_id}, "
+                f"status_code={status_code}"
+            )
             if vale_order_id is not None:
                 message += f", vale_order_id={vale_order_id}"
             raise NotFoundException(message + ".")

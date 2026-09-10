@@ -142,8 +142,18 @@ class SqlAlchemyOrderRepository:
         return entities
 
     async def list_with_tax_reference(
-        self, vale_order_id: Optional[int], skip: int, limit: int
+        self,
+        vale_order_id: Optional[int],
+        skip: int,
+        limit: int,
+        process_id: int = 2,
+        status_code: int = 1,
     ) -> list[dict]:
+        # process_id/status_code parametrizados: o robô de abertura de chamado
+        # (besc-ticket-management) consome (2,1) "Criar Chamado" — os pedidos
+        # que ainda precisam de chamado; o besc-commercial-report consome (2,2)
+        # "Em andamento" — os que já têm chamado, pra mostrar o que está sendo
+        # corrigido. Mesma query, recortes diferentes.
         query = (
             select(OrderModel, ProductModel, TaxReferenceModel)
             .join(ProductModel, ProductModel.order_id == OrderModel.id)
@@ -151,7 +161,10 @@ class SqlAlchemyOrderRepository:
                 TaxReferenceModel,
                 TaxReferenceModel.id_product == ProductModel.id,
             )
-            .where(OrderModel.process_id == 2, OrderModel.status_code == 2)
+            .where(
+                OrderModel.process_id == process_id,
+                OrderModel.status_code == status_code,
+            )
             .order_by(OrderModel.id, ProductModel.id)
             .offset(skip)
             .limit(limit)

@@ -23,7 +23,12 @@ class OrderRepositoryProtocol(Protocol):
         ...
 
     async def list_with_tax_reference(
-        self, vale_order_id: Optional[int], skip: int, limit: int
+        self,
+        vale_order_id: Optional[int],
+        skip: int,
+        limit: int,
+        process_id: int = 2,
+        status_code: int = 1,
     ) -> list[dict]:
         ...
 

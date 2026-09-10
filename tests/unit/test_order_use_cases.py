@@ -45,7 +45,9 @@ class FakeOrderRepository:
             if o.process_id == process_id and o.status_code == status_code
         ][skip : skip + limit]
 
-    async def list_with_tax_reference(self, vale_order_id, skip, limit):
+    async def list_with_tax_reference(
+        self, vale_order_id, skip, limit, process_id=2, status_code=1
+    ):
         return []
 
     async def update_by_vale(self, vale_order_id, changes) -> Optional[Order]:
