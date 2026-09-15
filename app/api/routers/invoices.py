@@ -59,7 +59,7 @@ async def create_invoice(
     summary="List invoices",
     description=(
         "Lists invoices, optionally filtered by order or by pending "
-        "transmission (transmission_code still empty)."
+        "transmission (id_transmissao still empty)."
     ),
     responses={200: {"description": "Invoices retrieved successfully."}},
 )
@@ -83,7 +83,7 @@ async def list_invoices(
 @router.put(
     "/{invoice_id}",
     summary="Update an invoice",
-    description="Grava o transmission_code na etapa 2 (transmissão da NF-e).",
+    description="Grava id_transmissao/nfe na etapa 2 (transmissão da NF-e).",
     responses={
         200: {"description": "Invoice updated successfully."},
         400: {"description": "No fields to update."},

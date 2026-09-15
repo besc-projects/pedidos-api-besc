@@ -8,9 +8,10 @@ class InvoiceCreate(BaseModel):
     """Payload to register an issued invoice (nota fiscal emitida)."""
 
     order_id: int = Field(..., alias="orderId")
-    supra_id: int = Field(..., alias="supraId")
-    issue_code: str = Field(..., alias="issueCode", min_length=1)
-    transmission_code: Optional[str] = Field(None, alias="transmissionCode")
+    id_emissao: int = Field(..., alias="idEmissao")
+    data: datetime = Field(..., alias="data")
+    id_transmissao: Optional[int] = Field(None, alias="idTransmissao")
+    nfe: Optional[str] = Field(None, alias="nfe")
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -18,18 +19,20 @@ class InvoiceCreate(BaseModel):
         json_schema_extra={
             "example": {
                 "orderId": 715,
-                "supraId": 1403,
-                "issueCode": "2032",
-                "transmissionCode": None,
+                "idEmissao": 2032,
+                "data": "2026-09-14T16:41:00Z",
+                "idTransmissao": None,
+                "nfe": None,
             }
         },
     )
 
 
 class InvoiceUpdate(BaseModel):
-    """Editable fields — usado na etapa 2 para gravar o código de transmissão."""
+    """Editable fields — usado na etapa 2 para gravar transmissão/NF-e."""
 
-    transmission_code: Optional[str] = Field(None, alias="transmissionCode")
+    id_transmissao: Optional[int] = Field(None, alias="idTransmissao")
+    nfe: Optional[str] = Field(None, alias="nfe")
 
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
@@ -48,9 +51,10 @@ class InvoiceResponse(BaseModel):
 
     id: int
     order_id: int
-    supra_id: int
-    issue_code: str
-    transmission_code: Optional[str] = None
+    id_emissao: int
+    data: datetime
+    id_transmissao: Optional[int] = None
+    nfe: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

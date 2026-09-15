@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
 
 from app.db.base import Base
 
@@ -16,6 +16,7 @@ class Invoice(Base):
         nullable=False,
         index=True,
     )
-    supra_id = Column(BigInteger, nullable=False)
-    issue_code = Column(String(100), nullable=False)
-    transmission_code = Column(String(100), nullable=True)
+    id_emissao = Column(Integer, nullable=False)
+    id_transmissao = Column(Integer, nullable=True)
+    nfe = Column(String(100), nullable=True)
+    data = Column(DateTime(timezone=True), nullable=False)

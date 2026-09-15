@@ -8,36 +8,44 @@ class Invoice:
     """Domain entity for an issued invoice (nota fiscal).
 
     Framework-agnostic: guarantees the consistency of its own state only.
-    Stage 1 fills `issue_code`; stage 2 (transmission) fills `transmission_code`.
+    Stage 1 fills `id_emissao`/`data`; stage 2 (transmission) fills
+    `id_transmissao`/`nfe`.
     """
 
     def __init__(
         self,
         *,
         order_id: int,
-        supra_id: int,
-        issue_code: str,
-        transmission_code: Optional[str] = None,
+        id_emissao: int,
+        data: datetime,
+        id_transmissao: Optional[int] = None,
+        nfe: Optional[str] = None,
         id: Optional[int] = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
     ) -> None:
         self.id = id
         self.order_id = order_id
-        self.supra_id = supra_id
-        self.issue_code = issue_code
-        self.transmission_code = transmission_code
+        self.id_emissao = id_emissao
+        self.data = data
+        self.id_transmissao = id_transmissao
+        self.nfe = nfe
         self.created_at = created_at
         self.updated_at = updated_at
 
         self._ensure_valid()
 
     def _ensure_valid(self) -> None:
-        if not self.issue_code:
-            raise ValidationException("issue_code is required.")
+        if not self.id_emissao:
+            raise ValidationException("id_emissao is required.")
+        if not self.data:
+            raise ValidationException("data is required.")
 
     def is_transmitted(self) -> bool:
-        return bool(self.transmission_code)
+        return bool(self.id_transmissao)
 
-    def set_transmission(self, transmission_code: str) -> None:
-        self.transmission_code = transmission_code
+    def set_transmission(
+        self, id_transmissao: Optional[int], nfe: Optional[str] = None
+    ) -> None:
+        self.id_transmissao = id_transmissao
+        self.nfe = nfe

@@ -13,9 +13,10 @@ class CreateInvoiceUseCase:
     async def execute(self, data: InvoiceCreate) -> Invoice:
         invoice = Invoice(
             order_id=data.order_id,
-            supra_id=data.supra_id,
-            issue_code=data.issue_code,
-            transmission_code=data.transmission_code,
+            id_emissao=data.id_emissao,
+            data=data.data,
+            id_transmissao=data.id_transmissao,
+            nfe=data.nfe,
         )
 
         if not await self._repository.order_exists(invoice.order_id):

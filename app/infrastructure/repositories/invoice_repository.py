@@ -19,9 +19,10 @@ class SqlAlchemyInvoiceRepository:
         return Invoice(
             id=model.id,
             order_id=model.order_id,
-            supra_id=model.supra_id,
-            issue_code=model.issue_code,
-            transmission_code=model.transmission_code,
+            id_emissao=model.id_emissao,
+            data=model.data,
+            id_transmissao=model.id_transmissao,
+            nfe=model.nfe,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -57,9 +58,9 @@ class SqlAlchemyInvoiceRepository:
         if order_id is not None:
             query = query.where(InvoiceModel.order_id == order_id)
         if pending_transmission is True:
-            query = query.where(InvoiceModel.transmission_code.is_(None))
+            query = query.where(InvoiceModel.id_transmissao.is_(None))
         elif pending_transmission is False:
-            query = query.where(InvoiceModel.transmission_code.is_not(None))
+            query = query.where(InvoiceModel.id_transmissao.is_not(None))
 
         result = await self._session.execute(query)
         return [self._to_entity(model) for model in result.scalars().all()]
@@ -67,9 +68,10 @@ class SqlAlchemyInvoiceRepository:
     async def create(self, invoice: Invoice) -> Invoice:
         model = InvoiceModel(
             order_id=invoice.order_id,
-            supra_id=invoice.supra_id,
-            issue_code=invoice.issue_code,
-            transmission_code=invoice.transmission_code,
+            id_emissao=invoice.id_emissao,
+            data=invoice.data,
+            id_transmissao=invoice.id_transmissao,
+            nfe=invoice.nfe,
         )
         self._session.add(model)
         await self._session.flush()
@@ -82,7 +84,8 @@ class SqlAlchemyInvoiceRepository:
         )
         model = result.scalars().first()
 
-        model.transmission_code = invoice.transmission_code
+        model.id_transmissao = invoice.id_transmissao
+        model.nfe = invoice.nfe
 
         await self._session.flush()
         await self._session.refresh(model)

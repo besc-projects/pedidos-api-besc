@@ -19,7 +19,10 @@ class UpdateInvoiceUseCase:
         if not changes:
             raise ValidationException("No fields to update.")
 
-        if "transmission_code" in changes:
-            invoice.set_transmission(changes["transmission_code"])
+        if "id_transmissao" in changes or "nfe" in changes:
+            invoice.set_transmission(
+                id_transmissao=changes.get("id_transmissao", invoice.id_transmissao),
+                nfe=changes.get("nfe", invoice.nfe),
+            )
 
         return await self._repository.update(invoice)
