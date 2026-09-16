@@ -104,6 +104,7 @@ class SqlAlchemyPurchaseRequestRepository:
         model.released_quantity = purchase_request.released_quantity
         model.requested_quantity = purchase_request.requested_quantity
         model.status = purchase_request.status
+        model.supplier_product_code = purchase_request.supplier_product_code
 
         await self._session.flush()
         await self._session.refresh(model)

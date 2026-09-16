@@ -37,6 +37,11 @@ class PurchaseRequestUpdate(BaseModel):
 
     released_quantity: Optional[float] = Field(None, alias="releasedQuantity")
     requested_quantity: Optional[float] = Field(None, alias="requestedQuantity")
+    # A part_number can map to more than one SUPRA product code; the caller
+    # re-resolves the right one on every check (never trusts the code stored
+    # at creation), so the record needs to follow when a different code is
+    # the one that actually had stock.
+    supplier_product_code: Optional[str] = Field(None, alias="supplierProductCode")
     status: Optional[PurchaseRequestStatus] = Field(None, alias="status")
 
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)

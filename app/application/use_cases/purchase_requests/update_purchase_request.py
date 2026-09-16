@@ -30,4 +30,7 @@ class UpdatePurchaseRequestUseCase:
             requested_quantity=changes.get("requested_quantity"),
         )
 
+        if "supplier_product_code" in changes:
+            purchase_request.supplier_product_code = changes["supplier_product_code"]
+
         return await self._repository.update(purchase_request)
