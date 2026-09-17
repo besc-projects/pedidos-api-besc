@@ -1,5 +1,7 @@
 from datetime import date
 
+from sqlalchemy.exc import IntegrityError
+
 from app.domain.entities.history_process_entry import HistoryProcessEntry
 from app.domain.exceptions import ConflictException, NotFoundException
 from app.domain.protocols.history_process_repository import (
@@ -9,21 +11,19 @@ from app.schemas.history_process import HistoryProcessCreate
 
 
 class CreateHistoryProcessUseCase:
-    """Create a history event, avoiding duplicates per (order_id, description)."""
+    """Create a history event, avoiding duplicates per (order_id, description).
+
+    A dedup em si é o índice único ``uq_audit_process_history_order_description``
+    no banco — insere direto e trata a violação de unicidade como 409. Antes
+    disso fazia um SELECT de verificação antes do INSERT (check-then-insert),
+    que virou table scan conforme a tabela cresceu e, sob escrita concorrente
+    de vários robôs, tendia a lock de tabela (achado de 17/09/2026).
+    """
 
     def __init__(self, repository: HistoryProcessRepositoryProtocol) -> None:
         self._repository = repository
 
     async def execute(self, data: HistoryProcessCreate) -> HistoryProcessEntry:
-        existing = await self._repository.get_by_order_and_description(
-            data.order_id, data.description
-        )
-        if existing is not None:
-            raise ConflictException(
-                "This history already exists for this order "
-                f"(order_id={data.order_id})."
-            )
-
         entry = HistoryProcessEntry(
             order_id=data.order_id,
             step=data.step,
@@ -32,7 +32,13 @@ class CreateHistoryProcessUseCase:
             created_by=data.created_by,
             occurred_at=data.occurred_at,
         )
-        return await self._repository.create(entry)
+        try:
+            return await self._repository.create(entry)
+        except IntegrityError as exc:
+            raise ConflictException(
+                "This history already exists for this order "
+                f"(order_id={data.order_id})."
+            ) from exc
 
 
 class ListHistoryProcessUseCase:

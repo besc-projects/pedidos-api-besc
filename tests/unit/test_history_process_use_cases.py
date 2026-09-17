@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from app.application.use_cases.history_process.use_cases import (
     CreateHistoryProcessUseCase,
@@ -49,6 +50,15 @@ class FakeHistoryProcessRepository:
         ]
 
     async def create(self, entry: HistoryProcessEntry) -> HistoryProcessEntry:
+        # Simula a constraint única (order_id, description) do banco real —
+        # a checagem de duplicata agora vive no índice, não num SELECT prévio.
+        duplicate = any(
+            e.order_id == entry.order_id and e.description == entry.description
+            for e in self._items
+        )
+        if duplicate:
+            raise IntegrityError("insert", {}, Exception("unique violation"))
+
         entry.id = self._next_id
         self._next_id += 1
         self._items.append(entry)

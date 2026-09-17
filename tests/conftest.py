@@ -60,7 +60,16 @@ async def client(db_session: AsyncSession) -> AsyncClient:
     """Authenticated HTTP client bound to the ephemeral SQLite session."""
 
     async def override_get_db():
-        yield db_session
+        # Espelha o get_db real (commit por request / rollback em exceção):
+        # sem isso, uma request que falhe no meio do teste (ex.: duplicata)
+        # dá rollback na sessão inteira, desfazendo requests anteriores que
+        # nunca foram commitadas.
+        try:
+            yield db_session
+            await db_session.commit()
+        except Exception:
+            await db_session.rollback()
+            raise
 
     app.dependency_overrides[get_db] = override_get_db
     token = create_access_token("integration-tester")

@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.history_process_entry import HistoryProcessEntry
@@ -108,6 +109,15 @@ class SqlAlchemyHistoryProcessRepository:
 
         model = HistoryProcessModel(**values)
         self._session.add(model)
-        await self._session.flush()
+        try:
+            await self._session.flush()
+        except IntegrityError:
+            # Deixa a sessão pronta pro caller usar de novo — sem isso, um
+            # duplicado deixa a sessão presa em "pending rollback" até o fim
+            # da request (get_db só dá rollback numa exceção que chega até
+            # ele; quem depende de uma sessão de vida mais longa, como os
+            # testes de integração, precisa disso feito aqui).
+            await self._session.rollback()
+            raise
         await self._session.refresh(model)
         return self._to_entity(model)
