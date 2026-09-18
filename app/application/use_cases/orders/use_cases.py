@@ -6,6 +6,7 @@ from app.domain.entities.order import Order
 from app.domain.entities.product import Product
 from app.domain.exceptions import NotFoundException, ValidationException
 from app.domain.protocols.order_repository import OrderRepositoryProtocol
+from app.domain.services.tax_comparison import compare_fields
 from app.schemas.orders import OrderCreate, OrderUpdate
 
 NEW_ORDER_PROCESS_ID = 1
@@ -102,6 +103,30 @@ class ListOrdersWithTaxReferenceUseCase:
                 message += f", vale_order_id={vale_order_id}"
             raise NotFoundException(message + ".")
         return orders
+
+
+class GetOrderTaxComparisonUseCase:
+    """Per item: declared fiscal fields vs the SUPRA reference, field by field."""
+
+    def __init__(self, repository: OrderRepositoryProtocol) -> None:
+        self._repository = repository
+
+    async def execute(self, vale_order_id: int) -> list[dict]:
+        items = await self._repository.get_tax_comparison(vale_order_id)
+        return [
+            {
+                "item": item["item"],
+                "part_number": item["part_number"],
+                "description": item["description"],
+                "fields": compare_fields(item["declared"], item["correct"]),
+                "declared_source": item.get("declared_source", "live"),
+                "detected_at": item.get("detected_at"),
+                "resolved_at": item.get("resolved_at"),
+                "state": item.get("state", "aberta"),
+                "ticket": item.get("ticket"),
+            }
+            for item in items
+        ]
 
 
 class UpdateOrderStatusUseCase:

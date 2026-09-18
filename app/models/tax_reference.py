@@ -15,6 +15,16 @@ class TaxReferenceProductSupra(Base):
     icms_st = Column(Numeric(5, 2), nullable=True)
     origin = Column(String(50), nullable=True)
 
+    # Snapshot do valor declarado na detecção (o "antes"), o vínculo com o
+    # chamado que trata a divergência e quando ela foi resolvida.
+    declared_ncm_code = Column(String(10), nullable=True)
+    declared_ipi = Column(Numeric(5, 2), nullable=True)
+    declared_icms = Column(Numeric(5, 2), nullable=True)
+    declared_icms_st = Column(Numeric(5, 2), nullable=True)
+    declared_origin = Column(String(50), nullable=True)
+    ticket_id = Column(Integer, nullable=True, index=True)
+    resolved_at = Column(DateTime, nullable=True)
+
     created_at = Column(
         DateTime,
         server_default=func.now(),

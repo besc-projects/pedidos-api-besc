@@ -221,6 +221,86 @@ class SqlAlchemyOrderRepository:
 
         return list(orders_map.values())
 
+    async def get_tax_comparison(self, vale_order_id: int) -> list[dict]:
+        """Uma linha por detecção de divergência (pricing.tax_references) do
+        pedido: o declarado (snapshot gravado na detecção; sem snapshot, cai no
+        valor ao vivo de core.products), a referência do SUPRA e o chamado que
+        a trata. Só existe referência pra produto que o besc-tax_discrepancy
+        marcou como divergente, então pedido sem divergência devolve vazio."""
+        result = await self._session.execute(
+            select(ProductModel, TaxReferenceModel, TicketModel)
+            .join(OrderModel, OrderModel.id == ProductModel.order_id)
+            .join(TaxReferenceModel, TaxReferenceModel.id_product == ProductModel.id)
+            .outerjoin(TicketModel, TicketModel.id == TaxReferenceModel.ticket_id)
+            .where(OrderModel.vale_order_id == vale_order_id)
+            .order_by(
+                ProductModel.id,
+                TaxReferenceModel.created_at.desc(),
+                TaxReferenceModel.id.desc(),
+            )
+        )
+
+        fields = ("ncm_code", "origin", "icms", "ipi", "icms_st")
+        items: list[dict] = []
+        seen: set[tuple] = set()
+        for product, tax_ref, ticket in result.all():
+            has_snapshot = tax_ref.declared_ncm_code is not None
+            declared = (
+                {
+                    "ncm_code": tax_ref.declared_ncm_code,
+                    "origin": tax_ref.declared_origin,
+                    "icms": tax_ref.declared_icms,
+                    "ipi": tax_ref.declared_ipi,
+                    "icms_st": tax_ref.declared_icms_st,
+                }
+                if has_snapshot
+                else {field: getattr(product, field) for field in fields}
+            )
+            correct = {field: getattr(tax_ref, field) for field in fields}
+
+            # Detecções repetidas do mesmo produto/chamado com os mesmos
+            # valores viram uma só (fica a mais recente, que vem primeiro).
+            key = (
+                product.id,
+                tax_ref.ticket_id,
+                tuple(str(declared[f]) for f in fields),
+                tuple(str(correct[f]) for f in fields),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+
+            resolved = (
+                tax_ref.resolved_at is not None
+                or (ticket is not None and ticket.closed_at is not None)
+                or (ticket is None and product.tickets_status_id == 2)
+            )
+            items.append(
+                {
+                    "product_id": product.id,
+                    "item": product.item,
+                    "part_number": product.part_number,
+                    "description": product.description,
+                    "declared": declared,
+                    "correct": correct,
+                    "declared_source": "snapshot" if has_snapshot else "live",
+                    "detected_at": tax_ref.created_at,
+                    "resolved_at": tax_ref.resolved_at,
+                    "state": "resolvida" if resolved else "aberta",
+                    "ticket": (
+                        {
+                            "id": ticket.id,
+                            "number": ticket.ticket_number,
+                            "opened_at": ticket.opened_at,
+                            "closed_at": ticket.closed_at,
+                        }
+                        if ticket is not None
+                        else None
+                    ),
+                }
+            )
+        return items
+
     async def update_by_vale(
         self, vale_order_id: int, changes: dict
     ) -> Optional[Order]:

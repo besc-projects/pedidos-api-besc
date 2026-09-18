@@ -22,6 +22,13 @@ class CreateTaxReferenceUseCase:
             icms=data.icms,
             icms_st=data.icms_st,
             origin=data.origin,
+            declared_ncm_code=data.declared_ncm_code,
+            declared_ipi=data.declared_ipi,
+            declared_icms=data.declared_icms,
+            declared_icms_st=data.declared_icms_st,
+            declared_origin=data.declared_origin,
+            ticket_id=data.ticket_id,
+            resolved_at=data.resolved_at,
         )
         return await self._repository.create(tax_reference)
 

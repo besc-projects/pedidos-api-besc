@@ -32,6 +32,9 @@ class OrderRepositoryProtocol(Protocol):
     ) -> list[dict]:
         ...
 
+    async def get_tax_comparison(self, vale_order_id: int) -> list[dict]:
+        ...
+
     async def update_by_vale(
         self, vale_order_id: int, changes: dict
     ) -> Optional[Order]:

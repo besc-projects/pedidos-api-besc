@@ -11,12 +11,14 @@ from app.api.dependencies.orders import (
     get_list_orders_by_status_use_case,
     get_list_orders_with_tax_reference_use_case,
     get_list_pending_orders_use_case,
+    get_order_tax_comparison_use_case,
     get_update_order_status_use_case,
     get_update_order_use_case,
 )
 from app.application.use_cases.orders.use_cases import (
     CreateOrderUseCase,
     DeleteOrderUseCase,
+    GetOrderTaxComparisonUseCase,
     GetOrderWithProductsUseCase,
     ListOrdersByStatusUseCase,
     ListOrdersWithTaxReferenceUseCase,
@@ -131,6 +133,23 @@ async def get_orders_with_tax_reference(
                 "orders": orders,
             }
         ),
+    )
+
+
+@router.get(
+    "/{vale_order_id}/tax-comparison",
+    summary="Declared vs SUPRA reference fiscal fields, per item",
+)
+async def get_order_tax_comparison(
+    vale_order_id: int,
+    use_case: GetOrderTaxComparisonUseCase = Depends(
+        get_order_tax_comparison_use_case
+    ),
+) -> JSONResponse:
+    items = await use_case.execute(vale_order_id)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder({"vale_order_id": vale_order_id, "items": items}),
     )
 
 

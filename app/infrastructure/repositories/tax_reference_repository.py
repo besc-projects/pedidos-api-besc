@@ -27,6 +27,13 @@ class SqlAlchemyTaxReferenceRepository:
             icms=model.icms,
             icms_st=model.icms_st,
             origin=model.origin,
+            declared_ncm_code=model.declared_ncm_code,
+            declared_ipi=model.declared_ipi,
+            declared_icms=model.declared_icms,
+            declared_icms_st=model.declared_icms_st,
+            declared_origin=model.declared_origin,
+            ticket_id=model.ticket_id,
+            resolved_at=model.resolved_at,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -72,6 +79,13 @@ class SqlAlchemyTaxReferenceRepository:
             icms=tax_reference.icms,
             icms_st=tax_reference.icms_st,
             origin=tax_reference.origin,
+            declared_ncm_code=tax_reference.declared_ncm_code,
+            declared_ipi=tax_reference.declared_ipi,
+            declared_icms=tax_reference.declared_icms,
+            declared_icms_st=tax_reference.declared_icms_st,
+            declared_origin=tax_reference.declared_origin,
+            ticket_id=tax_reference.ticket_id,
+            resolved_at=tax_reference.resolved_at,
         )
         self._session.add(model)
         await self._session.flush()

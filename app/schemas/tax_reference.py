@@ -11,6 +11,13 @@ class TaxReferenceBase(BaseModel):
     icms: Optional[Decimal] = Field(None, description="Alíquota ICMS (%)")
     icms_st: Optional[Decimal] = Field(None, description="Alíquota ICMS-ST (%)")
     origin: Optional[str] = Field(None, description="Origem do produto", max_length=50)
+    declared_ncm_code: Optional[str] = Field(None, description="NCM declarado no pedido", max_length=10)
+    declared_ipi: Optional[Decimal] = Field(None, description="IPI declarado (%)")
+    declared_icms: Optional[Decimal] = Field(None, description="ICMS declarado (%)")
+    declared_icms_st: Optional[Decimal] = Field(None, description="ICMS-ST declarado (%)")
+    declared_origin: Optional[str] = Field(None, description="Origem declarada", max_length=50)
+    ticket_id: Optional[int] = Field(None, description="Chamado que trata a divergência")
+    resolved_at: Optional[datetime] = Field(None, description="Quando a divergência foi resolvida")
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -30,6 +37,13 @@ class TaxReferenceUpdate(BaseModel):
     icms: Optional[Decimal] = Field(None, description="Alíquota ICMS (%)")
     icms_st: Optional[Decimal] = Field(None, description="Alíquota ICMS-ST (%)")
     origin: Optional[str] = Field(None, description="Origem do produto", max_length=50)
+    declared_ncm_code: Optional[str] = Field(None, description="NCM declarado no pedido", max_length=10)
+    declared_ipi: Optional[Decimal] = Field(None, description="IPI declarado (%)")
+    declared_icms: Optional[Decimal] = Field(None, description="ICMS declarado (%)")
+    declared_icms_st: Optional[Decimal] = Field(None, description="ICMS-ST declarado (%)")
+    declared_origin: Optional[str] = Field(None, description="Origem declarada", max_length=50)
+    ticket_id: Optional[int] = Field(None, description="Chamado que trata a divergência")
+    resolved_at: Optional[datetime] = Field(None, description="Quando a divergência foi resolvida")
 
     model_config = ConfigDict(from_attributes=True)
 

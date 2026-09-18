@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.application.use_cases.orders.use_cases import (
     CreateOrderUseCase,
     DeleteOrderUseCase,
+    GetOrderTaxComparisonUseCase,
     GetOrderWithProductsUseCase,
     ListOrdersByStatusUseCase,
     ListOrdersWithTaxReferenceUseCase,
@@ -50,6 +51,12 @@ def get_list_orders_with_tax_reference_use_case(
     repository: OrderRepositoryProtocol = Depends(get_order_repository),
 ) -> ListOrdersWithTaxReferenceUseCase:
     return ListOrdersWithTaxReferenceUseCase(repository)
+
+
+def get_order_tax_comparison_use_case(
+    repository: OrderRepositoryProtocol = Depends(get_order_repository),
+) -> GetOrderTaxComparisonUseCase:
+    return GetOrderTaxComparisonUseCase(repository)
 
 
 def get_update_order_status_use_case(

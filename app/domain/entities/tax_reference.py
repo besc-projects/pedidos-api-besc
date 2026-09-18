@@ -14,6 +14,13 @@ class TaxReference:
     icms: Optional[Decimal] = None
     icms_st: Optional[Decimal] = None
     origin: Optional[str] = None
+    declared_ncm_code: Optional[str] = None
+    declared_ipi: Optional[Decimal] = None
+    declared_icms: Optional[Decimal] = None
+    declared_icms_st: Optional[Decimal] = None
+    declared_origin: Optional[str] = None
+    ticket_id: Optional[int] = None
+    resolved_at: Optional[datetime] = None
     id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
